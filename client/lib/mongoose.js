@@ -22,6 +22,7 @@ async function dbConnect() {
         console.log("🔄 Connecting to MongoDB...");
         const opts = {
             // bufferCommands: true, // Auto-buffering is better for serverless
+            serverSelectionTimeoutMS: 5000,
         };
 
         cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {

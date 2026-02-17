@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
     baseURL: '/api', // This works for local dev via next.config.mjs proxy OR Vercel
-    timeout: 10000,
+    timeout: 30000,
 });
 
 // Add a request interceptor to include the JWT token
