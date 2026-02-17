@@ -6,6 +6,10 @@ const nextConfig = {
       { protocol: 'https', hostname: 'res.cloudinary.com' }
     ],
   },
+  env: {
+    MONGODB_URI: "mongodb+srv://uviii24568_db_user:%40sujal1234@cluster0.kz5lwzw.mongodb.net/?appName=Cluster0",
+    JWT_SECRET: "sujal_secret_123",
+  },
   async rewrites() {
     // Check both potential env vars for flexibility
     let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000';
