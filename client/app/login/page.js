@@ -16,8 +16,9 @@ export default function Login() {
         try {
             await login(email, password);
         } catch (err) {
-            console.error(err);
-            alert(err.response?.data?.message || 'Invalid email or password. Please try again.');
+            console.error('Login Error:', err);
+            const errorMsg = err.response?.data?.message || err.message || 'Login failed. Check server connection.';
+            alert(errorMsg);
         } finally {
             setLoading(false);
         }

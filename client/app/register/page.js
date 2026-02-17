@@ -26,7 +26,9 @@ export default function Register() {
             }
             await register(formData);
         } catch (err) {
-            alert(err.response?.data?.message || 'Registration failed');
+            console.error('Registration Error:', err);
+            const errorMsg = err.response?.data?.message || err.message || 'Registration failed. Check if backend is running.';
+            alert(errorMsg);
         } finally {
             setLoading(false);
         }
