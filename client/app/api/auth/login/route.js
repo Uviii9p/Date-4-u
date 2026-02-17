@@ -11,7 +11,19 @@ const generateToken = (id) => {
 export async function POST(req) {
     try {
         await dbConnect();
-        const { email, password } = await req.json();
+
+        // Ensure User model is properly loaded
+        if (!User || typeof User.findOne !== 'function') {
+            console.error("User model is not correctly initialized", User);
+            return NextResponse.json({ message: 'Database model error' }, { status: 500 });
+        }
+
+        const body = await req.json();
+        const { email, password } = body;
+
+        if (!email || !password) {
+            return NextResponse.json({ message: 'Email and password are required' }, { status: 400 });
+        }
 
         const user = await User.findOne({ email });
         if (user && (await bcrypt.compare(password, user.password))) {
