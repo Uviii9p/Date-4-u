@@ -1,4 +1,6 @@
-# 🚀 Deployment Guide for Date2W
+# 🚀 Deployment Guide for Date2W (Updated)
+
+**NOTE**: If your folders look like empty links on GitHub, you must force push your code using the terminal instructions below.
 
 This guide will help you deploy your application so it works perfectly in production.
 
