@@ -50,14 +50,16 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (userData) => {
         try {
-            const { data } = await api.post('/auth/register', userData);
-            const { token, ...newUserData } = data;
+            const response = await api.post('/auth/register', userData);
+            const { token, ...newUserData } = response.data; // Correctly access response.data
 
             localStorage.setItem('token', token);
             setUser(newUserData);
 
+            // Give a small delay for state to settle before redirect
             setTimeout(() => router.push('/profile/edit'), 100);
         } catch (error) {
+            console.error("Register failed", error.response?.data || error);
             throw error;
         }
     };
