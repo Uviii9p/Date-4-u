@@ -10,8 +10,7 @@ if (!cached) {
 
 async function dbConnect() {
     if (!MONGODB_URI) {
-        console.error("❌ MONGODB_URI is undefined in process.env");
-        throw new Error('MONGODB_URI is missing. Please add it to your Vercel Environment Variables.');
+        throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
     }
 
     if (cached.conn) {
@@ -19,21 +18,22 @@ async function dbConnect() {
     }
 
     if (!cached.promise) {
-        console.log("🔄 Connecting to MongoDB...");
         const opts = {
-            // bufferCommands: true, // Auto-buffering is better for serverless
-            serverSelectionTimeoutMS: 5000,
+            bufferCommands: false,
         };
 
         cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-            console.log("✅ New MongoDB Connection Established");
             return mongoose;
-        }).catch(err => {
-            console.error("❌ MongoDB Connection Error:", err);
-            throw err;
         });
     }
-    cached.conn = await cached.promise;
+
+    try {
+        cached.conn = await cached.promise;
+    } catch (e) {
+        cached.promise = null;
+        throw e;
+    }
+
     return cached.conn;
 }
 
