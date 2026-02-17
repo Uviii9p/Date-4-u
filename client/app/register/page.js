@@ -40,7 +40,7 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[#0A0A0A] relative overflow-hidden">
+        <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#0A0A0A] relative overflow-y-auto">
             {/* Background Glows */}
             <div className="absolute top-0 right-0 w-[50vw] h-[50vh] bg-pink-500/10 blur-[120px] rounded-full -z-10" />
             <div className="absolute bottom-0 left-0 w-[40vw] h-[40vh] bg-purple-600/10 blur-[100px] rounded-full -z-10" />
@@ -48,13 +48,13 @@ export default function Register() {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="w-full max-w-md glass-card p-10 flex flex-col shadow-2xl relative z-10 border-white/5"
+                className="w-full max-w-md glass-card p-8 my-8 flex flex-col shadow-2xl relative z-10 border-white/5"
             >
-                <div className="mb-8">
-                    <h1 className="text-4xl font-black mb-2 tracking-tighter italic text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
+                <div className="mb-6">
+                    <h1 className="text-4xl font-black mb-1 tracking-tighter italic text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
                         DATE2W
                     </h1>
-                    <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">Create your universe</p>
+                    <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.2em]">Create your universe</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">

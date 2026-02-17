@@ -30,7 +30,7 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-[#050505] relative">
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[#050505] relative overflow-y-auto">
             {/* Ambient Background */}
             <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,#1a1a1a_0%,#000_100%)] opacity-50"></div>
             <div className="absolute top-1/4 -left-20 w-80 h-80 bg-pink-500/10 blur-[120px] rounded-full animate-pulse"></div>
@@ -39,7 +39,7 @@ export default function Login() {
             <motion.div
                 initial={{ opacity: 0, y: 30, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                className="relative w-full glass-card p-10 flex flex-col shadow-2xl border border-white/5 z-10"
+                className="relative w-full max-w-md glass-card p-8 my-8 flex flex-col shadow-2xl border border-white/5 z-10"
             >
                 <div>
                     <h1 className="text-4xl font-black mb-2 tracking-tighter italic text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500">
