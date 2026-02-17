@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: '/api', // This will be proxied by Next.js in development
+    baseURL: '/api', // This works for local dev via next.config.mjs proxy OR Vercel
     timeout: 10000,
 });
 
