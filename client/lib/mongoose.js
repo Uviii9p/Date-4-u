@@ -2,10 +2,6 @@ import mongoose from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!MONGODB_URI) {
-    throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
-}
-
 let cached = global.mongoose;
 
 if (!cached) {
@@ -13,6 +9,12 @@ if (!cached) {
 }
 
 async function dbConnect() {
+    if (!MONGODB_URI) {
+        // During build time, Next.js evaluates routes. We don't want to crash.
+        console.warn('⚠️ MONGODB_URI is not defined. Skipping database connection.');
+        return null;
+    }
+
     if (cached.conn) {
         return cached.conn;
     }
