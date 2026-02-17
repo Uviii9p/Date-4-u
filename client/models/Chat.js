@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const chatSchema = new mongoose.Schema({
-    members: [{ type: String }], // Use String to support both UUIDs and ObjectIds if needed, but preferably ObjectIds in Mongoose
+    members: [{ type: String }],
     messages: [
         {
             senderId: { type: String, required: true },
@@ -18,4 +18,4 @@ const chatSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Chat', chatSchema);
+export default mongoose.models.Chat || mongoose.model('Chat', chatSchema);

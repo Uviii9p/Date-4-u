@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -30,7 +30,6 @@ userSchema.index({ location: '2dsphere' });
 
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next();
-    // Only hash if it's not already hashed (starts with $2b$ or similar)
     if (!this.password.startsWith('$2')) {
         this.password = await bcrypt.hash(this.password, 10);
     }
@@ -41,4 +40,4 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
     return await bcrypt.compare(candidatePassword, this.password);
 };
 
-module.exports = mongoose.model('User', userSchema);
+export default mongoose.models.User || mongoose.model('User', userSchema);
