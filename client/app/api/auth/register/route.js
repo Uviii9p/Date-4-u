@@ -10,6 +10,13 @@ const generateToken = (id) => {
 export async function POST(req) {
     try {
         await dbConnect();
+
+        // Ensure User model is properly loaded
+        if (!User || typeof User.findOne !== 'function') {
+            console.error("User model is not correctly initialized", User);
+            return NextResponse.json({ message: 'Database model error' }, { status: 500 });
+        }
+
         const { name, email, password, age, gender } = await req.json();
 
         if (!email || !password) {

@@ -1,23 +1,26 @@
-# 🛑 CRITICAL: Fix "Timeout" / "Connection Failed" Errors
+# 🔍 How to Find "Network Access" in MongoDB Atlas
 
-If you see a "Timeout" error when logging in or signing up on Vercel, it is 99% because **MongoDB Atlas is blocking Vercel's connection**.
+If you don't see "Network Access" in the left menu, follow these steps:
 
-## How to Fix (Takes 30 seconds):
+## Method 1: The "Connect" Button (Easiest)
+1.  Go to the **"Database"** tab (usually the first item in the left menu).
+2.  You should see your Cluster (e.g., "Cluster0").
+3.  Click the **"Connect"** button on that cluster card.
+4.  In the popup window, look for a section about **IP Access**.
+    *   It might say "Allow Access from Anywhere".
+    *   Or "Add your current IP Address".
+5.  Click **"Allow Access from Anywhere"** (or add `0.0.0.0/0` manually).
 
-1.  **Go to MongoDB Atlas**: Log in to [cloud.mongodb.com](https://cloud.mongodb.com).
-2.  **Click "Network Access"**: Look for this in the left-side menu under "Security".
-3.  **Click "+ ADD IP ADDRESS"**: The big green button.
-4.  **Select "Allow Access From Anywhere"**: 
-    *   Click the button that says **"Allow Access From Anywhere"**.
-    *   Make sure the IP Address box shows `0.0.0.0/0`.
-5.  **Click "Confirm"**.
+## Method 2: The "Security" Heading
+1.  Look at the Left Sidebar.
+2.  Find the word **SECURITY** (it might be a small heading).
+3.  Under **SECURITY**, you should see:
+    *   Database Access
+    *   **Network Access** (This is the one!)
 
-**Wait 1-2 minutes for the changes to apply, then refresh your Vercel app and try again.**
+## Method 3: Direct Link
+Try to edit your browser URL to look like this:
+`https://cloud.mongodb.com/v2/YOUR_PROJECT_ID#security/network/accessList`
 
 ---
-
-### Why is this necessary?
-Vercel uses dynamic IP addresses that change constantly. MongoDB is secure by default and blocks unknown IPs. By adding `0.0.0.0/0`, you tell MongoDB to allow connections from your Vercel app.
-
-### Still having issues?
-If you still can't connect, double-check your password in the `MONGODB_URI` environment variable in Vercel.
+**Once you add `0.0.0.0/0`, wait 1 minute and try to Register again on Vercel.**
