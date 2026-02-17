@@ -1,0 +1,204 @@
+[
+  {
+    "_id": "50660ad9-8720-42c1-858e-0ef9a0fa7fd5",
+    "name": "Aria Smith",
+    "email": "aria@example.com",
+    "password": "$2b$10$VZFCGulxdQ1Yq8YYltdh0OB/.3OMVbETIwCLEAb2mrKUhHRCj48.C",
+    "age": 24,
+    "gender": "female",
+    "genderPreference": "male",
+    "bio": "Coffee lover and world traveler. Looking for someone to share adventures with.",
+    "interests": [
+      "Traveling",
+      "Coffee",
+      "Photography"
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800"
+    ],
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        -122.4194,
+        37.7749
+      ]
+    },
+    "likes": [],
+    "dislikes": [],
+    "matches": [],
+    "isPremium": false,
+    "onlineStatus": false,
+    "createdAt": "2026-02-12T10:55:17.045Z"
+  },
+  {
+    "_id": "49cb40af-8be1-4530-9c7c-a1227f6e98d0",
+    "name": "James Wilson",
+    "email": "james@example.com",
+    "password": "$2b$10$JmOsu50xOeEW6wkbpt51heDXi0bY.gdmK/46TKrzAlxzGJbcwSExy",
+    "age": 28,
+    "gender": "male",
+    "genderPreference": "female",
+    "bio": "Tech enthusiast and foodie. Always down for a good brunch.",
+    "interests": [
+      "Tech",
+      "Cooking",
+      "Brunch"
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800"
+    ],
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        -122.4194,
+        37.7749
+      ]
+    },
+    "likes": [],
+    "dislikes": [],
+    "matches": [],
+    "isPremium": false,
+    "onlineStatus": false,
+    "createdAt": "2026-02-12T10:55:17.151Z"
+  },
+  {
+    "_id": "24f097d0-7fd6-4b1f-b351-a4c871e5e543",
+    "name": "Test User",
+    "email": "test3@example.com",
+    "password": "$2b$10$SyTvD4CFXps7ZWElKCWjReOGaz1hBtZr/bp6sTEiJQChEMP7eY6lW",
+    "age": 25,
+    "gender": "male",
+    "likes": [],
+    "dislikes": [],
+    "matches": [],
+    "images": [],
+    "interests": [],
+    "isPremium": false,
+    "onlineStatus": false,
+    "createdAt": "2026-02-12T10:57:49.950Z"
+  },
+  {
+    "_id": "190f2240-de9c-4a13-8166-e73dd5c016e5",
+    "name": "gui",
+    "email": "uiatio7@gmail.com",
+    "password": "$2b$10$pk9hipaDP29tFATNI45U3OdO5RXXUzj3a6lZOxhEipBoZAILeiHWe",
+    "age": 19,
+    "gender": "male",
+    "likes": [
+      "50660ad9-8720-42c1-858e-0ef9a0fa7fd5"
+    ],
+    "dislikes": [],
+    "matches": [],
+    "images": [
+      "/uploads/images-1770894611808-111856729.jpg",
+      "/uploads/images-1770894611811-450092536.jpg",
+      "/uploads/images-1770894611813-513957253.png",
+      "/uploads/images-1770894611814-677473470.png",
+      "/uploads/images-1770894611814-302152561.png",
+      "/uploads/images-1770894611815-609182177.jpg"
+    ],
+    "interests": [
+      "tea"
+    ],
+    "isPremium": false,
+    "onlineStatus": false,
+    "createdAt": "2026-02-12T10:58:09.985Z",
+    "bio": "good",
+    "genderPreference": "female"
+  },
+  {
+    "_id": "86b15b04-295e-4057-8889-e5709cec7f39",
+    "name": "Test Upload User",
+    "email": "uploadtest@example.com",
+    "password": "$2b$10$pDIYhklGCUrwC4s.k2gPk.8CRvwHJY/lichJjp5pPSJb0B3UMeZHK",
+    "age": 25,
+    "gender": "male",
+    "likes": [],
+    "dislikes": [],
+    "matches": [],
+    "images": [
+      "/uploads/images-1770894511708-718008877.png"
+    ],
+    "interests": [],
+    "isPremium": false,
+    "onlineStatus": false,
+    "createdAt": "2026-02-12T11:06:56.819Z",
+    "bio": "Updated Bio via Script"
+  },
+  {
+    "_id": "e03fe396-cce8-4a74-8832-66384800ce62",
+    "name": "mohit",
+    "email": "mohit908@gmail.com",
+    "password": "$2b$10$i/gL4cdYs2vQY035fiIrBONY.RXQaSB3Ja8ENIojyOupI9Y2JYW.2",
+    "age": 19,
+    "gender": "male",
+    "likes": [
+      "190f2240-de9c-4a13-8166-e73dd5c016e5",
+      "190f2240-de9c-4a13-8166-e73dd5c016e5"
+    ],
+    "dislikes": [
+      "50660ad9-8720-42c1-858e-0ef9a0fa7fd5"
+    ],
+    "matches": [],
+    "images": [
+      "/uploads/images-1770894994815-906526237.jpg",
+      "/uploads/images-1770894994817-634926536.png",
+      "/uploads/images-1770894994827-158497618.jpg",
+      "/uploads/images-1770894994835-234794582.jpg",
+      "/uploads/images-1770894994843-794867262.jpg",
+      "/uploads/images-1770894994849-113385786.jpg"
+    ],
+    "interests": [
+      "chut"
+    ],
+    "isPremium": false,
+    "onlineStatus": false,
+    "createdAt": "2026-02-12T11:15:51.569Z",
+    "bio": "gandu",
+    "genderPreference": "female"
+  },
+  {
+    "_id": "79520ac3-5856-4582-b82d-8738c7c45165",
+    "name": "sujal",
+    "email": "bharatlabs.in@gmail.com",
+    "password": "$2b$10$8o54GB8TheMpwz3JN86t9uFyyMtDxYRoeCqXh2StzYxxZd2DhgBNG",
+    "age": 18,
+    "gender": "male",
+    "likes": [
+      "e03fe396-cce8-4a74-8832-66384800ce62"
+    ],
+    "dislikes": [
+      "e03fe396-cce8-4a74-8832-66384800ce62",
+      "86b15b04-295e-4057-8889-e5709cec7f39",
+      "190f2240-de9c-4a13-8166-e73dd5c016e5",
+      "24f097d0-7fd6-4b1f-b351-a4c871e5e543",
+      "50660ad9-8720-42c1-858e-0ef9a0fa7fd5",
+      "49cb40af-8be1-4530-9c7c-a1227f6e98d0"
+    ],
+    "matches": [],
+    "images": [],
+    "interests": [],
+    "isPremium": false,
+    "onlineStatus": false,
+    "createdAt": "2026-02-17T05:02:48.618Z",
+    "genderPreference": "both"
+  },
+  {
+    "_id": "582e2108-3c47-4942-928e-dd2bf456e3e8",
+    "name": "uviii",
+    "email": "sr3052236@gmail.com",
+    "password": "$2b$10$OcrrN49rSezVTjCDSY6Dp.2OEQoCKBj/cYFzUI2LTGq5KN0hsmnPi",
+    "age": 19,
+    "gender": "male",
+    "likes": [
+      "e03fe396-cce8-4a74-8832-66384800ce62"
+    ],
+    "dislikes": [],
+    "matches": [],
+    "images": [],
+    "interests": [],
+    "isPremium": false,
+    "onlineStatus": false,
+    "createdAt": "2026-02-17T05:44:03.116Z"
+  }
+]

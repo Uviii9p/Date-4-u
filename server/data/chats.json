@@ -1,0 +1,73 @@
+[
+  {
+    "_id": "72a14226-2d5c-4832-b353-91d4ee9c0d78",
+    "messages": [
+      {
+        "senderId": "e03fe396-cce8-4a74-8832-66384800ce62",
+        "text": "hi",
+        "createdAt": "2026-02-12T12:25:25.451Z",
+        "seen": false,
+        "_id": "48ec7501-5a65-4388-adb4-085859001b68"
+      },
+      {
+        "senderId": "190f2240-de9c-4a13-8166-e73dd5c016e5",
+        "text": "lun le le",
+        "createdAt": "2026-02-12T12:26:24.150Z",
+        "seen": false,
+        "_id": "58a90ce8-adb4-43e1-abff-ca3b9ff523b7"
+      },
+      {
+        "senderId": "190f2240-de9c-4a13-8166-e73dd5c016e5",
+        "text": "k",
+        "createdAt": "2026-02-12T12:27:36.227Z",
+        "seen": false,
+        "_id": "eb537f92-bab1-4182-b953-24223952bda6"
+      }
+    ],
+    "members": [
+      "e03fe396-cce8-4a74-8832-66384800ce62",
+      "190f2240-de9c-4a13-8166-e73dd5c016e5"
+    ],
+    "createdAt": "2026-02-12T12:25:15.134Z",
+    "updatedAt": "2026-02-12T12:27:36.227Z"
+  },
+  {
+    "_id": "2a691b4a-bfbc-4cbf-9afe-b3b29bb786ce",
+    "messages": [
+      {
+        "senderId": "79520ac3-5856-4582-b82d-8738c7c45165",
+        "text": "hi",
+        "createdAt": "2026-02-17T05:03:55.945Z",
+        "seen": false,
+        "_id": "f34816ff-5feb-4adf-8ad1-f02db869492b"
+      },
+      {
+        "senderId": "79520ac3-5856-4582-b82d-8738c7c45165",
+        "text": "📷 Photo",
+        "type": "image",
+        "mediaUrl": "/uploads/chat/chat-1771306306703-b4c0bfb9.jpg",
+        "fileName": "camera-1771306300985.jpg",
+        "fileSize": 63331,
+        "createdAt": "2026-02-17T05:31:46.713Z",
+        "seen": false,
+        "_id": "b58a1dcb-a385-4155-a330-459a2aba9dcf"
+      }
+    ],
+    "members": [
+      "79520ac3-5856-4582-b82d-8738c7c45165",
+      "e03fe396-cce8-4a74-8832-66384800ce62"
+    ],
+    "createdAt": "2026-02-17T05:03:52.422Z",
+    "updatedAt": "2026-02-17T05:31:46.714Z"
+  },
+  {
+    "_id": "24ca70b8-366c-40ea-88ec-d7de2f59e285",
+    "messages": [],
+    "members": [
+      "582e2108-3c47-4942-928e-dd2bf456e3e8",
+      "e03fe396-cce8-4a74-8832-66384800ce62"
+    ],
+    "createdAt": "2026-02-17T05:44:44.754Z",
+    "updatedAt": "2026-02-17T05:56:42.477Z"
+  }
+]

@@ -1,0 +1,14 @@
+node_modules
+.next
+client/.next
+server/data/uploads/*
+!server/data/uploads/.gitkeep
+.env
+client/.env.local
+server/.env
+server/server_log.txt
+server/server_output.txt
+*.log
+.DS_Store
+dist
+build
