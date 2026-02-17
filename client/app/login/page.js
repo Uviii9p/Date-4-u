@@ -17,7 +17,12 @@ export default function Login() {
             await login(email, password);
         } catch (err) {
             console.error('Login Error:', err);
-            const errorMsg = err.response?.data?.message || err.message || 'Login failed. Check server connection.';
+            let errorMsg = err.response?.data?.message || err.message || 'Login failed.';
+
+            // Helpful advice for production 404s
+            if (err.response?.status === 404 || err.code === 'ERR_NETWORK') {
+                errorMsg = "Backend not reachable (404). If this is production, please check if NEXT_PUBLIC_BACKEND_URL is set in Vercel.";
+            }
             alert(errorMsg);
         } finally {
             setLoading(false);

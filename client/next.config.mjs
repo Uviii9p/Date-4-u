@@ -7,7 +7,17 @@ const nextConfig = {
     ],
   },
   async rewrites() {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:5000';
+    // Check both potential env vars for flexibility
+    let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000';
+
+    // Clean up the URL: if it ends with /api, remove it because we add it in the destination
+    if (backendUrl.endsWith('/api')) {
+      backendUrl = backendUrl.slice(0, -4);
+    }
+    if (backendUrl.endsWith('/api/')) {
+      backendUrl = backendUrl.slice(0, -5);
+    }
+
     return [
       {
         source: '/api/:path*',
