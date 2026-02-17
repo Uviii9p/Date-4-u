@@ -11,6 +11,12 @@ export async function GET(req) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         }
 
+        // Ensure User model is properly loaded
+        if (!User || typeof User.findById !== 'function') {
+            console.error("User model is not correctly initialized in Profile Route", User);
+            return NextResponse.json({ message: 'Database model error' }, { status: 500 });
+        }
+
         const user = await User.findById(decoded.id);
         if (user) {
             const userObj = user.toObject();
