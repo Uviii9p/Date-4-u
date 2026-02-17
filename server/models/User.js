@@ -14,10 +14,10 @@ const userSchema = new mongoose.Schema({
         type: { type: String, default: 'Point' },
         coordinates: { type: [Number], default: [0, 0] } // [longitude, latitude]
     },
-    images: [{ type: String }], // Cloudinary URLs
-    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    matches: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    images: [{ type: String }], // Cloudinary or Local Upload URLs
+    likes: [{ type: String }], // Using String for compatibility with UUIDs/ObjectIds
+    dislikes: [{ type: String }],
+    matches: [{ type: String }],
     isPremium: { type: Boolean, default: false },
     swipeLimit: { type: Number, default: 20 },
     lastSwipeDate: { type: Date, default: Date.now },
@@ -30,7 +30,10 @@ userSchema.index({ location: '2dsphere' });
 
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next();
-    this.password = await bcrypt.hash(this.password, 10);
+    // Only hash if it's not already hashed (starts with $2b$ or similar)
+    if (!this.password.startsWith('$2')) {
+        this.password = await bcrypt.hash(this.password, 10);
+    }
     next();
 });
 
