@@ -40,4 +40,11 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
     return await bcrypt.compare(candidatePassword, this.password);
 };
 
-export default mongoose.models.User || mongoose.model('User', userSchema);
+// Prevent model recompilation error in development/serverless
+if (mongoose.models.User) {
+    delete mongoose.models.User;
+}
+
+const User = mongoose.model('User', userSchema);
+
+export default User;
