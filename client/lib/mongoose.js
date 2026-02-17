@@ -23,13 +23,14 @@ async function dbConnect() {
             serverSelectionTimeoutMS: 5000,
         };
 
-        cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-            return mongoose;
+        cached.promise = mongoose.connect(MONGODB_URI, opts).then((m) => {
+            return m;
         });
     }
 
     try {
-        cached.conn = await cached.promise;
+        const mongooseInstance = await cached.promise;
+        cached.conn = mongooseInstance.connection;
     } catch (e) {
         cached.promise = null;
         throw e;
