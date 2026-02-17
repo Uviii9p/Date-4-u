@@ -3,9 +3,15 @@ import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import BottomNav from '@/components/BottomNav';
 
+// Polyfills moved to client-side only to prevent breaking server-side build
 if (typeof window !== 'undefined') {
-  window.Buffer = window.Buffer || require('buffer').Buffer;
-  window.process = window.process || require('process');
+  try {
+    const { Buffer } = require('buffer');
+    window.Buffer = window.Buffer || Buffer;
+    window.process = window.process || require('process');
+  } catch (e) {
+    console.warn('Polyfill loading failed', e);
+  }
 }
 
 const inter = Inter({ subsets: ['latin'] });

@@ -4,7 +4,11 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useSocket } from '@/hooks/useSocket';
 import { Mic, MicOff, Video, VideoOff, PhoneOff, User } from 'lucide-react';
-import Peer from 'simple-peer';
+// Peer will be imported dynamically inside useEffect to avoid build errors
+let Peer;
+if (typeof window !== 'undefined') {
+    Peer = require('simple-peer');
+}
 
 export default function CallPage() {
     const { userId } = useParams();
