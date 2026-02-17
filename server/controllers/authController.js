@@ -14,7 +14,7 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: 'Email and password are required' });
         }
 
-        const userExists = db.users.findOne({ email });
+        const userExists = await db.users.findOne({ email });
         if (userExists) {
             console.log(`[API] Registration failed: User ${email} already exists`);
             return res.status(400).json({ message: 'User already exists' });
@@ -40,7 +40,7 @@ const loginUser = async (req, res) => {
     console.log(`[API] Attempting login for: ${email}`);
 
     try {
-        const user = db.users.findOne({ email });
+        const user = await db.users.findOne({ email });
         if (user && (await db.users.comparePassword(password, user.password))) {
             console.log(`[API] Login successful for: ${email}`);
             const { password: pass, ...userWithoutPassword } = user;

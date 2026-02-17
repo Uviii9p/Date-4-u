@@ -2,11 +2,38 @@ const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
+
+// Models
+const User = require('./models/User');
+const Chat = require('./models/Chat');
+const Match = require('./models/Match');
+const Report = require('./models/Report');
 
 const DATA_DIR = path.join(__dirname, 'data');
 if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
 }
+
+let isUsingMongoDB = false;
+
+const connectDB = async () => {
+    if (process.env.MONGODB_URI) {
+        try {
+            await mongoose.connect(process.env.MONGODB_URI);
+            console.log('✅ Connected to MongoDB');
+            isUsingMongoDB = true;
+        } catch (err) {
+            console.error('❌ MongoDB Connection Error:', err);
+            console.log('⚠️ Falling back to Local File Storage');
+        }
+    } else {
+        console.log('ℹ️ No MONGODB_URI found. Using Local File Storage');
+    }
+};
+
+// Initialize connection
+connectDB();
 
 const getFilePath = (collection) => path.join(DATA_DIR, `${collection}.json`);
 
@@ -30,7 +57,8 @@ const writeData = (collection, data) => {
 
 const db = {
     users: {
-        find: (query = {}) => {
+        find: async (query = {}) => {
+            if (isUsingMongoDB) return await User.find(query);
             let data = readData('users');
             return data.filter(item => {
                 return Object.keys(query).every(key => {
@@ -45,11 +73,18 @@ const db = {
                 });
             });
         },
-        findById: (id) => readData('users').find(u => u._id === id),
-        findOne: (query) => readData('users').find(u => {
-            return Object.keys(query).every(key => u[key] === query[key]);
-        }),
+        findById: async (id) => {
+            if (isUsingMongoDB) return await User.findById(id);
+            return readData('users').find(u => u._id === id);
+        },
+        findOne: async (query) => {
+            if (isUsingMongoDB) return await User.findOne(query);
+            return readData('users').find(u => {
+                return Object.keys(query).every(key => u[key] === query[key]);
+            });
+        },
         create: async (userData) => {
+            if (isUsingMongoDB) return await User.create(userData);
             const users = readData('users');
             const hashedPassword = userData.password ? await bcrypt.hash(userData.password, 10) : '';
             const newUser = {
@@ -70,7 +105,8 @@ const db = {
             writeData('users', users);
             return newUser;
         },
-        findByIdAndUpdate: (id, updates) => {
+        findByIdAndUpdate: async (id, updates) => {
+            if (isUsingMongoDB) return await User.findByIdAndUpdate(id, updates, { new: true });
             const users = readData('users');
             const index = users.findIndex(u => u._id === id);
             if (index !== -1) {
@@ -91,7 +127,8 @@ const db = {
         }
     },
     matches: {
-        create: (matchData) => {
+        create: async (matchData) => {
+            if (isUsingMongoDB) return await Match.create(matchData);
             const matches = readData('matches');
             const newMatch = { _id: uuidv4(), ...matchData, createdAt: new Date().toISOString() };
             matches.push(newMatch);
@@ -100,7 +137,8 @@ const db = {
         }
     },
     reports: {
-        create: (reportData) => {
+        create: async (reportData) => {
+            if (isUsingMongoDB) return await Report.create(reportData);
             const reports = readData('reports');
             const newReport = { _id: uuidv4(), ...reportData, createdAt: new Date().toISOString() };
             reports.push(newReport);
@@ -109,7 +147,8 @@ const db = {
         }
     },
     chats: {
-        find: (query = {}) => {
+        find: async (query = {}) => {
+            if (isUsingMongoDB) return await Chat.find(query);
             const chats = readData('chats');
             const membersId = query['members._id'];
             if (membersId) {
@@ -117,22 +156,28 @@ const db = {
             }
             return chats;
         },
-        findById: (id) => readData('chats').find(c => c._id === id),
-        findOne: (query) => {
+        findById: async (id) => {
+            if (isUsingMongoDB) return await Chat.findById(id);
+            return readData('chats').find(c => c._id === id);
+        },
+        findOne: async (query) => {
+            if (isUsingMongoDB) return await Chat.findOne(query);
             const chats = readData('chats');
             if (query.members && query.members.$all) {
                 return chats.find(c => query.members.$all.every(id => c.members.some(m => (m === id || m._id === id))));
             }
             return null;
         },
-        create: (chatData) => {
+        create: async (chatData) => {
+            if (isUsingMongoDB) return await Chat.create(chatData);
             const chats = readData('chats');
             const newChat = { _id: uuidv4(), messages: [], ...chatData, createdAt: new Date().toISOString() };
             chats.push(newChat);
             writeData('chats', chats);
             return newChat;
         },
-        findByIdAndUpdate: (id, updates) => {
+        findByIdAndUpdate: async (id, updates) => {
+            if (isUsingMongoDB) return await Chat.findByIdAndUpdate(id, updates, { new: true });
             const chats = readData('chats');
             const index = chats.findIndex(c => c._id === id);
             if (index !== -1) {

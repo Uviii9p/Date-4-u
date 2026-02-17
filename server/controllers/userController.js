@@ -2,7 +2,7 @@ const db = require('../db');
 
 const getProfile = async (req, res) => {
     try {
-        const user = db.users.findById(req.user.id);
+        const user = await db.users.findById(req.user.id);
         if (user) {
             const { password, ...userWithoutPassword } = user;
             res.json(userWithoutPassword);
@@ -19,7 +19,7 @@ const updateProfile = async (req, res) => {
         console.log(`[API] Updating profile for user: ${req.user.id}`);
         console.log(`[API] Request Body:`, req.body);
 
-        const user = db.users.findById(req.user.id);
+        const user = await db.users.findById(req.user.id);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -53,7 +53,7 @@ const updateProfile = async (req, res) => {
             updates.images = [...(user.images || []), ...imageUrls].slice(-6);
         }
 
-        const updatedUser = db.users.findByIdAndUpdate(req.user.id, updates);
+        const updatedUser = await db.users.findByIdAndUpdate(req.user.id, updates);
         console.log(`[API] Profile updated successfully for: ${req.user.id}`);
         const { password, ...safeUser } = updatedUser;
         res.json(safeUser);
@@ -65,7 +65,7 @@ const updateProfile = async (req, res) => {
 
 const getDiscoveryUsers = async (req, res) => {
     try {
-        const currentUser = db.users.findById(req.user.id);
+        const currentUser = await db.users.findById(req.user.id);
         const excludeIds = [...(currentUser.likes || []), ...(currentUser.dislikes || []), ...(currentUser.matches || []), currentUser._id];
 
         let query = {
@@ -77,7 +77,7 @@ const getDiscoveryUsers = async (req, res) => {
             query.gender = currentUser.genderPreference;
         }
 
-        const users = db.users.find(query);
+        const users = await db.users.find(query);
 
         // Sort by common interests matching score
         const sortedUsers = users.map(user => {
@@ -100,8 +100,8 @@ const searchUsers = async (req, res) => {
             return res.json([]);
         }
 
-        const currentUser = db.users.findById(req.user.id);
-        const allUsers = db.users.find({
+        const currentUser = await db.users.findById(req.user.id);
+        const allUsers = await db.users.find({
             _id: { $ne: currentUser._id } // Exclude self
         });
 
@@ -119,7 +119,7 @@ const searchUsers = async (req, res) => {
 
 const getUserById = async (req, res) => {
     try {
-        const user = db.users.findById(req.params.id);
+        const user = await db.users.findById(req.params.id);
         if (user) {
             const { password, ...userWithoutPassword } = user;
             res.json(userWithoutPassword);

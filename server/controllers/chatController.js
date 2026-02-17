@@ -39,20 +39,22 @@ const upload = multer({
 
 const getChats = async (req, res) => {
     try {
-        const chats = db.chats.find({ 'members._id': req.user.id });
+        const chats = await db.chats.find({ 'members': req.user.id });
 
         // Populate members manually
-        const populatedChats = chats.map(chat => {
-            const populatedMembers = chat.members.map(memberId => {
-                const u = db.users.findById(memberId);
+        const populatedChats = await Promise.all(chats.map(async (chat) => {
+            const rawChat = chat.toObject ? chat.toObject() : chat;
+            const populatedMembers = await Promise.all(rawChat.members.map(async (memberId) => {
+                const u = await db.users.findById(memberId);
                 if (u) {
-                    const { password, ...safeUser } = u;
+                    const safeUser = u.toObject ? u.toObject() : u;
+                    delete safeUser.password;
                     return safeUser;
                 }
                 return memberId;
-            });
-            return { ...chat, members: populatedMembers };
-        });
+            }));
+            return { ...rawChat, members: populatedMembers };
+        }));
 
         res.json(populatedChats.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)));
     } catch (error) {
@@ -62,23 +64,24 @@ const getChats = async (req, res) => {
 
 const getMessages = async (req, res) => {
     try {
-        let chat = db.chats.findOne({
+        let chat = await db.chats.findOne({
             members: { $all: [req.user.id, req.params.userId] }
         });
 
         if (!chat) {
             // Create new chat if not found (Enable direct messaging)
-            chat = db.chats.create({
+            chat = await db.chats.create({
                 members: [req.user.id, req.params.userId],
                 messages: []
             });
         }
 
-        const populatedMembers = chat.members.map(id => {
-            const u = db.users.findById(id);
+        const rawChat = chat.toObject ? chat.toObject() : chat;
+        const populatedMembers = await Promise.all(rawChat.members.map(async (id) => {
+            const u = await db.users.findById(id);
             return u ? { _id: u._id, name: u.name, images: u.images } : id;
-        });
-        res.json({ ...chat, members: populatedMembers });
+        }));
+        res.json({ ...rawChat, members: populatedMembers });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -87,12 +90,12 @@ const getMessages = async (req, res) => {
 const sendMessage = async (req, res) => {
     const { text, receiverId } = req.body;
     try {
-        let chat = db.chats.findOne({
+        let chat = await db.chats.findOne({
             members: { $all: [req.user.id, receiverId] }
         });
 
         if (!chat) {
-            chat = db.chats.create({
+            chat = await db.chats.create({
                 members: [req.user.id, receiverId],
                 messages: []
             });
@@ -107,12 +110,12 @@ const sendMessage = async (req, res) => {
             seen: false
         };
 
-        chat = db.chats.findByIdAndUpdate(chat._id, {
+        const updatedChat = await db.chats.findByIdAndUpdate(chat._id, {
             $push: { messages: newMessage },
             updatedAt: new Date().toISOString()
         });
 
-        res.json(chat);
+        res.json(updatedChat);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -123,42 +126,24 @@ const sendMedia = async (req, res) => {
         const { receiverId } = req.body;
         const file = req.file;
 
-        console.log('sendMedia called:', { receiverId, file: file ? file.filename : 'no file' });
-
         if (!file) {
-            console.error('No file uploaded in request');
             return res.status(400).json({ message: 'No file uploaded' });
         }
         if (!receiverId) {
-            console.error('No receiverId provided');
             return res.status(400).json({ message: 'receiverId is required' });
         }
 
-        // Determine media type
         const isImage = file.mimetype.startsWith('image/');
         const isVideo = file.mimetype.startsWith('video/');
         const mediaType = isImage ? 'image' : isVideo ? 'video' : 'file';
-
-        // Create media URL (relative to server root)
         const mediaUrl = `/uploads/chat/${file.filename}`;
 
-        console.log('Media file details:', {
-            originalName: file.originalname,
-            filename: file.filename,
-            mimetype: file.mimetype,
-            size: file.size,
-            mediaType,
-            mediaUrl,
-            storagePath: file.path
-        });
-
-        let chat = db.chats.findOne({
+        let chat = await db.chats.findOne({
             members: { $all: [req.user.id, receiverId] }
         });
 
         if (!chat) {
-            console.log('Creating new chat for media message');
-            chat = db.chats.create({
+            chat = await db.chats.create({
                 members: [req.user.id, receiverId],
                 messages: []
             });
@@ -176,15 +161,12 @@ const sendMedia = async (req, res) => {
             seen: false
         };
 
-        console.log('Creating message:', newMessage);
-
-        chat = db.chats.findByIdAndUpdate(chat._id, {
+        const updatedChat = await db.chats.findByIdAndUpdate(chat._id, {
             $push: { messages: newMessage },
             updatedAt: new Date().toISOString()
         });
 
-        console.log('Media message saved successfully');
-        res.json(chat);
+        res.json(updatedChat);
     } catch (error) {
         console.error('sendMedia error:', error);
         res.status(500).json({ message: error.message });
@@ -194,26 +176,25 @@ const sendMedia = async (req, res) => {
 const deleteMessage = async (req, res) => {
     try {
         const { chatId, messageId } = req.params;
-        const chat = db.chats.findById(chatId);
+        const chat = await db.chats.findById(chatId);
 
         if (!chat) {
             return res.status(404).json({ message: 'Chat not found' });
         }
 
-        // Check if message exists and user is sender
-        const messageIndex = chat.messages.findIndex(m => m._id === messageId);
+        const rawChat = chat.toObject ? chat.toObject() : chat;
+        const messageIndex = rawChat.messages.findIndex(m => m._id === messageId);
         if (messageIndex === -1) {
             return res.status(404).json({ message: 'Message not found' });
         }
 
-        if (chat.messages[messageIndex].senderId !== req.user.id) {
+        if (rawChat.messages[messageIndex].senderId !== req.user.id) {
             return res.status(403).json({ message: 'Unauthorized to delete this message' });
         }
 
-        // Remove message
-        const updatedMessages = chat.messages.filter(m => m._id !== messageId);
+        const updatedMessages = rawChat.messages.filter(m => m._id !== messageId);
 
-        const updatedChat = db.chats.findByIdAndUpdate(chatId, {
+        const updatedChat = await db.chats.findByIdAndUpdate(chatId, {
             messages: updatedMessages,
             updatedAt: new Date().toISOString()
         });
