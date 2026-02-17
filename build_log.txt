@@ -1,0 +1,37 @@
+
+> client@0.1.0 build
+> next build
+
+   Γû▓ Next.js 15.1.6
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+Failed to compile.
+
+./app/call/[userId]/page.js
+Module not found: Can't resolve 'lucide-react'
+
+https://nextjs.org/docs/messages/module-not-found
+
+./app/call/[userId]/page.js
+Module not found: Can't resolve 'simple-peer'
+
+https://nextjs.org/docs/messages/module-not-found
+
+./app/chat/[userId]/page.js
+Module not found: Can't resolve 'lucide-react'
+
+https://nextjs.org/docs/messages/module-not-found
+
+./app/chat/[userId]/page.js
+Module not found: Can't resolve 'framer-motion'
+
+https://nextjs.org/docs/messages/module-not-found
+
+./app/chat/page.js
+Module not found: Can't resolve 'lucide-react'
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+> Build failed because of webpack errors
