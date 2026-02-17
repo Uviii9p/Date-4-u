@@ -10,9 +10,7 @@ if (!cached) {
 
 async function dbConnect() {
     if (!MONGODB_URI) {
-        // During build time, Next.js evaluates routes. We don't want to crash.
-        console.warn('⚠️ MONGODB_URI is not defined. Skipping database connection.');
-        return null;
+        throw new Error('MONGODB_URI is missing. Please add it to your Vercel Environment Variables.');
     }
 
     if (cached.conn) {
