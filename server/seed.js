@@ -1,6 +1,5 @@
 const db = require('./db');
-const fs = require('fs');
-const path = require('path');
+const mongoose = require('mongoose');
 
 const dummyUsers = [
     {
@@ -31,26 +30,26 @@ const dummyUsers = [
 
 const seedDB = async () => {
     try {
-        console.log("Preparing local storage for seeding...");
+        // Wait for DB connection to be established if using MongoDB
+        if (process.env.MONGODB_URI) {
+            console.log("Seeding to MongoDB...");
+            // Small delay to ensure connection is ready
+            await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Clear existing local data
-        const DATA_DIR = path.join(__dirname, 'data');
-        if (fs.existsSync(DATA_DIR)) {
-            const files = fs.readdirSync(DATA_DIR);
-            for (const file of files) {
-                fs.unlinkSync(path.join(DATA_DIR, file));
-            }
+            // Optional: Clear existing users
+            const User = require('./models/User');
+            await User.deleteMany({});
+            console.log("Cleared existing MongoDB users.");
         } else {
-            fs.mkdirSync(DATA_DIR);
+            console.log("Seeding to local storage...");
+            // ... (keep local storage logic if needed, but db.js handles abstraction)
         }
-
-        console.log("Cleared existing local data.");
 
         for (const user of dummyUsers) {
             await db.users.create(user);
         }
 
-        console.log("Added dummy users to local storage successfully!");
+        console.log("Added dummy users successfully!");
         process.exit();
     } catch (err) {
         console.error("Seeding failed:", err);

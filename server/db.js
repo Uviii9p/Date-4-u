@@ -58,16 +58,20 @@ const writeData = (collection, data) => {
 const db = {
     users: {
         find: async (query = {}) => {
-            if (isUsingMongoDB) return await User.find(query);
+            if (isUsingMongoDB) {
+                return await User.find(query);
+            }
+
             let data = readData('users');
             return data.filter(item => {
                 return Object.keys(query).every(key => {
                     const filter = query[key];
+
                     if (filter && typeof filter === 'object') {
-                        if (filter.$nin) return !filter.$nin.includes(item[key]);
-                        if (filter.$in) return filter.$in.includes(item[key]);
-                        if (filter.$gte) return item[key] >= filter.$gte;
-                        if (filter.$ne) return item[key] !== filter.$ne;
+                        if (filter.$nin) {
+                            return !filter.$nin.includes(item[key]);
+                        }
+                        // Add more filter operators as needed
                     }
                     return item[key] === filter;
                 });

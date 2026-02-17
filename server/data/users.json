@@ -200,5 +200,67 @@
     "isPremium": false,
     "onlineStatus": false,
     "createdAt": "2026-02-17T05:44:03.116Z"
+  },
+  {
+    "_id": "1ad1ce1a-dd97-4f72-a3f5-f4886942e502",
+    "name": "Aria Smith",
+    "email": "aria@example.com",
+    "password": "$2b$10$YH.OuMfCt.jxGW3eInvkweXCvge4ITUOoEW1gUuTFMewIhTL82fE.",
+    "age": 24,
+    "gender": "female",
+    "genderPreference": "male",
+    "bio": "Coffee lover and world traveler. Looking for someone to share adventures with.",
+    "interests": [
+      "Traveling",
+      "Coffee",
+      "Photography"
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800"
+    ],
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        -122.4194,
+        37.7749
+      ]
+    },
+    "likes": [],
+    "dislikes": [],
+    "matches": [],
+    "isPremium": false,
+    "onlineStatus": false,
+    "createdAt": "2026-02-17T10:39:08.744Z"
+  },
+  {
+    "_id": "4bdb2105-4cb9-4198-a633-02ba6a588e20",
+    "name": "James Wilson",
+    "email": "james@example.com",
+    "password": "$2b$10$XJDz5sgiwfICFDtLmwSrqOB9naOM3XXb5c8TAsaPrmhwCt8FK8d3i",
+    "age": 28,
+    "gender": "male",
+    "genderPreference": "female",
+    "bio": "Tech enthusiast and foodie. Always down for a good brunch.",
+    "interests": [
+      "Tech",
+      "Cooking",
+      "Brunch"
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800"
+    ],
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        -122.4194,
+        37.7749
+      ]
+    },
+    "likes": [],
+    "dislikes": [],
+    "matches": [],
+    "isPremium": false,
+    "onlineStatus": false,
+    "createdAt": "2026-02-17T10:39:08.859Z"
   }
 ]
