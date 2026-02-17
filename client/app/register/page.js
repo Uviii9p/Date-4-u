@@ -29,11 +29,15 @@ export default function Register() {
             console.error('Registration Error:', err);
             let errorMsg = err.response?.data?.message || err.message || 'Registration failed.';
 
+            if (typeof errorMsg === 'object') {
+                errorMsg = JSON.stringify(errorMsg);
+            }
+
             // Helpful advice for production 404s
             if (err.response?.status === 404 || err.code === 'ERR_NETWORK') {
-                errorMsg = "Backend not reachable (404). If this is production, please check if NEXT_PUBLIC_BACKEND_URL is set in Vercel.";
+                errorMsg += "\n(Backend possibly unreachable)";
             }
-            alert(errorMsg);
+            alert(`Error: ${errorMsg}`);
         } finally {
             setLoading(false);
         }
