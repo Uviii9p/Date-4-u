@@ -46,6 +46,12 @@ export default function ChatRoom() {
     }, [userId, user]);
 
     useEffect(() => {
+        if (showCamera && cameraStream && videoRef.current) {
+            videoRef.current.srcObject = cameraStream;
+        }
+    }, [showCamera, cameraStream]);
+
+    useEffect(() => {
         if (socket) {
             socket.on('message received', (newMessage) => {
                 if (newMessage.senderId === userId) {
@@ -122,11 +128,11 @@ export default function ChatRoom() {
     // Camera Logic
     const startCamera = async () => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "user" },
+                audio: false
+            });
             setCameraStream(stream);
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-            }
             setShowCamera(true);
             setShowAttachMenu(false);
         } catch (err) {
@@ -381,7 +387,7 @@ export default function ChatRoom() {
                             <button onClick={closeCamera} className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center"><X size={20} /></button>
                         </div>
                         <div className="flex-1 relative rounded-[3rem] overflow-hidden border border-white/10 bg-black shadow-2xl">
-                            <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover scale-x-[-1]" />
+                            <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover scale-x-[-1]" />
                             <div className="absolute inset-0 border-[16px] border-black/20 pointer-events-none" />
                         </div>
                         <div className="py-12 flex justify-center items-center gap-10">
