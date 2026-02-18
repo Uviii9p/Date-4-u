@@ -34,15 +34,22 @@ export async function POST(req) {
             });
         }
 
-        // For serverless, we'd typically upload to a cloud storage (S3, Cloudinary, etc.)
-        // For now, send a placeholder response
+        // For serverless v-deployments (Vercel), we convert media to base64
+        // to avoid filesystem issues and use MongoDB as the storage.
         const mediaType = media?.type?.startsWith('image/') ? 'image' : 'video';
+
+        let mediaUrl = '';
+        if (media && media instanceof Blob) {
+            const buffer = Buffer.from(await media.arrayBuffer());
+            const base64 = buffer.toString('base64');
+            mediaUrl = `data:${media.type};base64,${base64}`;
+        }
 
         const newMessage = {
             senderId: decoded.id.toString(),
             text: mediaType === 'image' ? '📷 Photo' : '🎥 Video',
             type: mediaType,
-            mediaUrl: '',  // Would need cloud storage URL
+            mediaUrl: mediaUrl,
             createdAt: new Date(),
             seen: false
         };
