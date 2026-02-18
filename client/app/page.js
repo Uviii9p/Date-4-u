@@ -26,7 +26,7 @@ export default function Discover() {
         const { data } = await api.get('/users/discovery');
         setProfiles(data);
       } catch (err) {
-        console.error(err);
+        console.error('Discovery Fetch Error:', err);
       } finally {
         setLoading(false);
       }
@@ -36,13 +36,18 @@ export default function Discover() {
       fetchDiscovery();
       const safetyTimeout = setTimeout(() => {
         setLoading(false);
-      }, 5000);
+      }, 8000);
       return () => clearTimeout(safetyTimeout);
     }
   }, [user, authLoading, router]);
 
   const handleSwipe = async (direction, targetUserId) => {
+    if (!targetUserId) return;
+
+    // Find the swiped user for the match check later
     const targetUser = profiles.find(p => p._id === targetUserId);
+
+    // Optimistic UI update
     setProfiles(prev => prev.filter(p => p._id !== targetUserId));
 
     try {
@@ -61,7 +66,7 @@ export default function Discover() {
         });
       }
     } catch (err) {
-      console.error(err);
+      console.error('Swipe API Error:', err);
     }
   };
 
@@ -70,18 +75,16 @@ export default function Discover() {
       <div className="flex flex-col items-center justify-center h-screen bg-black">
         <motion.div
           animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.5, 1, 0.5]
+            scale: [1, 1.1, 1],
+            opacity: [0.6, 1, 0.6]
           }}
           transition={{ duration: 2, repeat: Infinity }}
-          className="relative"
+          className="flex flex-col items-center"
         >
-          <div className="w-32 h-32 rounded-full border border-pink-500/20 bg-pink-500/5 flex items-center justify-center">
-            <Heart size={48} className="text-pink-600 fill-pink-600 animate-pulse" />
+          <div className="w-24 h-24 rounded-full border-2 border-pink-500/20 bg-pink-500/5 flex items-center justify-center mb-10 shadow-[0_0_50px_rgba(255,0,128,0.1)]">
+            <Heart size={40} className="text-pink-600 fill-pink-600 animate-pulse" />
           </div>
-          <div className="absolute inset-x-0 -bottom-12 text-center">
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-pink-500/50">Finding Matches</p>
-          </div>
+          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-pink-500/50">Warping to Matches...</p>
         </motion.div>
       </div>
     );
@@ -93,24 +96,24 @@ export default function Discover() {
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="relative w-48 h-48 mb-12"
+          className="relative w-32 h-32 mb-10"
         >
-          <div className="absolute inset-0 bg-pink-500/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute inset-0 bg-pink-500/20 rounded-full blur-[60px] animate-pulse" />
           <div className="relative w-full h-full glass-card border-white/10 flex items-center justify-center">
-            <Sparkles size={64} className="text-pink-500/40" />
+            <Sparkles size={48} className="text-pink-500/60" />
           </div>
         </motion.div>
 
-        <h2 className="text-4xl font-black tracking-tighter mb-4 italic">End of the Vibes.</h2>
-        <p className="text-gray-500 font-medium max-w-[280px] mx-auto leading-relaxed mb-10">
-          You've vibed with everyone nearby for today. Come back tomorrow!
+        <h2 className="text-3xl font-black tracking-tighter mb-4 italic">No vibes found nearby.</h2>
+        <p className="text-gray-500 font-medium max-w-[260px] mx-auto leading-relaxed mb-10 text-sm">
+          You've seen everyone for now! Try expanding your search radius.
         </p>
 
         <button
           onClick={() => router.push('/profile/edit')}
-          className="px-8 py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all flex items-center gap-2"
+          className="px-8 py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all flex items-center gap-3 active:scale-95"
         >
-          <Settings2 size={16} /> Expand Search Area
+          <Settings2 size={16} /> Expand Reach
         </button>
       </div>
     );
@@ -118,42 +121,45 @@ export default function Discover() {
 
   return (
     <div className="relative h-screen bg-black overflow-hidden flex flex-col">
-      {/* Dynamic Header */}
-      <header className="fixed top-0 inset-x-0 z-50 p-6 flex justify-between items-center pointer-events-none">
+      {/* Premium Header */}
+      <header className="absolute top-0 inset-x-0 z-50 p-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-2 pointer-events-auto cursor-pointer"
-          onClick={() => router.push('/profile/edit')}
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => router.push('/profile')}
         >
-          <div className="w-10 h-10 rounded-full glass-morphism border-white/10 flex items-center justify-center overflow-hidden">
-            {user?.images?.[0] ? <img src={user.images[0]} className="w-full h-full object-cover" /> : <Settings2 size={18} className="text-white/40" />}
+          <div className="w-9 h-9 rounded-full glass-morphism border-white/10 flex items-center justify-center overflow-hidden">
+            {user?.images?.[0] ? <img src={user.images[0]} className="w-full h-full object-cover" /> : <Settings2 size={16} className="text-white/40" />}
           </div>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center pointer-events-auto"
+          className="text-center"
         >
-          <h1 className="text-xl font-black italic tracking-tighter gradient-text">DATE2W</h1>
+          <h1 className="text-lg font-black italic tracking-tighter gradient-text uppercase">Date2W</h1>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-2 pointer-events-auto"
+          className="flex items-center gap-2"
         >
-          <button className="w-10 h-10 rounded-full glass-morphism border-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all">
-            <Filter size={18} />
+          <button
+            onClick={() => router.push('/profile/edit')}
+            className="w-9 h-9 rounded-full glass-morphism border-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all shadow-lg active:scale-90"
+          >
+            <Filter size={16} />
           </button>
         </motion.div>
       </header>
 
-      {/* Main Discover Area */}
-      <main className="flex-1 relative flex flex-col items-center justify-center px-4 pt-16">
-        <div className="relative w-full max-w-[420px] aspect-[3/4.2]">
-          <AnimatePresence>
+      {/* Discover Area - Better Spacing */}
+      <main className="flex-1 relative flex flex-col items-center justify-start px-4 pt-24 pb-48">
+        <div className="relative w-full max-w-[380px] aspect-[3/4.5] mt-4">
+          <AnimatePresence mode="popLayout">
             {profiles.slice(0, 3).reverse().map((profile, index) => (
               <SwipeCard
                 key={profile._id}
@@ -166,72 +172,72 @@ export default function Discover() {
         </div>
       </main>
 
-      {/* Action Controls - Float over everything */}
-      <div className="fixed bottom-28 inset-x-0 z-[100] flex justify-center items-center gap-5 pointer-events-none">
+      {/* Floating Action Controls - Repositioned to avoid overlap */}
+      <div className="fixed bottom-32 inset-x-0 z-[100] flex justify-center items-center gap-4 pointer-events-none">
         <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.15 }}
+          whileTap={{ scale: 0.85 }}
           onClick={() => handleSwipe('left', profiles[0]?._id)}
-          className="pointer-events-auto w-16 h-16 rounded-full glass-morphism border-white/10 flex items-center justify-center text-red-500 shadow-xl group overflow-hidden"
+          className="pointer-events-auto w-14 h-14 rounded-full glass-morphism border-white/10 flex items-center justify-center text-red-500 shadow-2xl group relative overflow-hidden active:bg-red-500/10"
         >
-          <X size={32} strokeWidth={3} />
-          <div className="absolute inset-0 bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-        </motion.button>
-
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          className="pointer-events-auto w-14 h-14 rounded-full glass-morphism border-white/10 flex items-center justify-center text-yellow-500 shadow-xl group overflow-hidden"
-        >
-          <Star size={24} fill="currentColor" />
-          <div className="absolute inset-0 bg-yellow-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <X size={28} strokeWidth={3} />
+          <div className="absolute inset-0 bg-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
         </motion.button>
 
         <motion.button
           whileHover={{ scale: 1.15 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => handleSwipe('right', profiles[0]?._id)}
-          className="pointer-events-auto w-20 h-20 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-white shadow-[0_15px_30px_rgba(255,0,128,0.3)] shadow-xl group overflow-hidden"
+          whileTap={{ scale: 0.85 }}
+          className="pointer-events-auto w-12 h-12 rounded-full glass-morphism border-white/10 flex items-center justify-center text-yellow-500 shadow-2xl group relative overflow-hidden"
         >
-          <Heart size={40} strokeWidth={2.5} fill="currentColor" className="animate-pulse" />
-          <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <Star size={20} fill="currentColor" />
+          <div className="absolute inset-0 bg-yellow-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
         </motion.button>
 
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className="pointer-events-auto w-14 h-14 rounded-full glass-morphism border-white/10 flex items-center justify-center text-blue-400 shadow-xl group overflow-hidden"
+          onClick={() => handleSwipe('right', profiles[0]?._id)}
+          className="pointer-events-auto w-18 h-18 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-white shadow-[0_15px_40px_rgba(255,0,128,0.4)] group relative overflow-hidden active:scale-95"
         >
-          <Zap size={24} fill="currentColor" />
+          <Heart size={36} strokeWidth={2.5} fill="currentColor" className="animate-pulse" />
+          <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </motion.button>
+
+        <motion.button
+          whileHover={{ scale: 1.15 }}
+          whileTap={{ scale: 0.85 }}
+          className="pointer-events-auto w-12 h-12 rounded-full glass-morphism border-white/10 flex items-center justify-center text-blue-400 shadow-2xl group relative overflow-hidden"
+        >
+          <Zap size={20} fill="currentColor" />
           <div className="absolute inset-0 bg-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
         </motion.button>
       </div>
 
-      {/* Match Overlay */}
+      {/* Full-Screen Match Overlay */}
       <AnimatePresence>
         {matchData && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] bg-black/98 backdrop-blur-2xl flex flex-col items-center justify-center p-8 text-center"
+            className="fixed inset-0 z-[200] bg-black/98 backdrop-blur-3xl flex flex-col items-center justify-center p-8 text-center"
           >
             <motion.div
-              initial={{ scale: 0, rotate: -30 }}
+              initial={{ scale: 0, rotate: -20 }}
               animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", damping: 10 }}
-              className="mb-12"
+              transition={{ type: "spring", damping: 12, stiffness: 200 }}
+              className="mb-14"
             >
-              <h1 className="text-8xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-white to-purple-500 animate-gradient">
-                IT'S A MATCH!
+              <h1 className="text-7xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-white to-purple-500 animate-gradient">
+                IT'S A VIBE!
               </h1>
             </motion.div>
 
-            <div className="flex items-center -space-x-12 mb-16 px-10">
+            <div className="flex items-center -space-x-10 mb-16 relative">
               <motion.div
-                initial={{ x: -100, opacity: 0, rotate: -15 }}
-                animate={{ x: 0, opacity: 1, rotate: -10 }}
-                className="w-48 h-48 rounded-[3rem] border-4 border-white/10 overflow-hidden shadow-2xl relative z-10"
+                initial={{ x: -80, opacity: 0, rotate: -12 }}
+                animate={{ x: 0, opacity: 1, rotate: -8 }}
+                className="w-44 h-44 rounded-[2.5rem] border-4 border-white/10 overflow-hidden shadow-2xl relative z-10"
               >
                 <img src={user.images?.[0] || 'https://via.placeholder.com/400'} className="w-full h-full object-cover" />
               </motion.div>
@@ -239,39 +245,39 @@ export default function Discover() {
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ delay: 0.3 }}
-                className="w-20 h-20 bg-pink-500 rounded-full flex items-center justify-center z-30 shadow-[0_0_40px_rgba(255,0,128,0.5)] border-4 border-black"
+                transition={{ delay: 0.4, type: "spring" }}
+                className="w-18 h-18 bg-pink-500 rounded-full flex items-center justify-center z-30 shadow-[0_0_50px_rgba(255,0,128,0.6)] border-4 border-black"
               >
-                <Heart size={36} fill="white" className="text-white" />
+                <Heart size={32} fill="white" className="text-white" />
               </motion.div>
 
               <motion.div
-                initial={{ x: 100, opacity: 0, rotate: 15 }}
-                animate={{ x: 0, opacity: 1, rotate: 10 }}
-                className="w-48 h-48 rounded-[3rem] border-4 border-white/10 overflow-hidden shadow-2xl relative z-20"
+                initial={{ x: 80, opacity: 0, rotate: 12 }}
+                animate={{ x: 0, opacity: 1, rotate: 8 }}
+                className="w-44 h-44 rounded-[2.5rem] border-4 border-white/10 overflow-hidden shadow-2xl relative z-20"
               >
                 <img src={matchData.images?.[0] || 'https://via.placeholder.com/400'} className="w-full h-full object-cover" />
               </motion.div>
             </div>
 
-            <p className="text-3xl font-black text-white mb-4 tracking-tighter uppercase">
-              {matchData.name} <span className="text-pink-500">Liked</span> You Back!
+            <p className="text-2xl font-black text-white mb-3 tracking-tighter uppercase">
+              Universe Aligned!
             </p>
-            <p className="text-gray-500 font-bold mb-12 tracking-wide text-sm uppercase">You can now start a conversation</p>
+            <p className="text-gray-500 font-bold mb-12 text-[10px] uppercase tracking-widest">You and {matchData.name} are compatible</p>
 
-            <div className="w-full max-w-sm space-y-4">
+            <div className="w-full max-w-xs space-y-4">
               <button
                 onClick={() => router.push(`/chat/${matchData._id}`)}
-                className="w-full py-6 btn-primary rounded-[2rem] text-sm font-black tracking-widest uppercase flex items-center justify-center gap-3 active:scale-95 transition-all shadow-pink-500/20 shadow-2xl"
+                className="w-full py-5 btn-primary rounded-2xl text-[10px] font-black tracking-[0.2em] uppercase flex items-center justify-center gap-3 active:scale-95 transition-all shadow-2xl"
               >
-                <MessageSquare size={20} fill="currentColor" /> Send Message
+                <MessageSquare size={18} fill="currentColor" /> Open Comm-Link
               </button>
 
               <button
                 onClick={() => setMatchData(null)}
-                className="w-full py-6 rounded-[2rem] bg-white/5 border border-white/10 text-xs font-black tracking-widest uppercase text-white hover:bg-white/10 transition-all"
+                className="w-full py-5 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black tracking-widest uppercase text-gray-400 hover:text-white transition-all active:bg-white/10"
               >
-                Keep Swiping
+                Keep Exploring
               </button>
             </div>
           </motion.div>

@@ -46,17 +46,18 @@ body::before {
 
 .glass-card {
   background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 2rem;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
 .glass-morphism {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .btn-primary {
@@ -64,24 +65,26 @@ body::before {
   color: white;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
   padding: 1.25rem 2.5rem;
   border-radius: 1.5rem;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 10px 20px -10px rgba(255, 0, 128, 0.5);
+  box-shadow: 0 10px 30px -10px rgba(255, 0, 128, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
+  border: none;
+  cursor: pointer;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 15px 30px -10px rgba(255, 0, 128, 0.6);
+  box-shadow: 0 15px 40px -10px rgba(255, 0, 128, 0.6);
   filter: brightness(1.1);
 }
 
-.btn-primary:active {
+.btn-primary:active:not(:disabled) {
   transform: translateY(0) scale(0.98);
 }
 
@@ -93,8 +96,8 @@ body::before {
   width: calc(100% - 2rem);
   max-width: 24rem;
   background: rgba(10, 10, 10, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   height: 4.5rem;
   border-radius: 2.25rem;
@@ -102,32 +105,8 @@ body::before {
   justify-content: space-around;
   align-items: center;
   padding: 0 1.5rem;
-  z-index: 100;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-}
-
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: #666;
-  transition: all 0.3s ease;
-  padding: 0.75rem;
-  border-radius: 1.25rem;
-}
-
-.nav-item:hover {
-  color: white;
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.nav-item.active {
-  color: #FF0080;
-  background: rgba(255, 0, 128, 0.1);
-}
-
-.nav-item.active svg {
-  filter: drop-shadow(0 0 8px rgba(255, 0, 128, 0.5));
+  z-index: 1000;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
 }
 
 .swipe-card {
@@ -136,7 +115,7 @@ body::before {
   height: 100%;
   border-radius: 2.5rem;
   overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
 }
 
 /* Custom Scrollbar */
@@ -178,6 +157,32 @@ body::before {
 
 .gradient-text {
   background: linear-gradient(135deg, #FF0080 0%, #7928CA 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+/* Input Styles */
+input,
+select,
+textarea {
+  color-scheme: dark;
+}
+
+/* Skeleton Loading */
+.skeleton {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
