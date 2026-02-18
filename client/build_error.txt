@@ -1,0 +1,12 @@
+
+> client@0.1.0 build
+> next build --no-lint
+
+ ΓÜá Linting is disabled.
+   Γû▓ Next.js 15.1.6
+   - Environments: .env.local
+
+
+> Build error occurred
+Error: You cannot use different slug names for the same dynamic path ('chatId' !== 'userId').
+    at Array.forEach (<anonymous>)

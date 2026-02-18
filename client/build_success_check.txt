@@ -1,0 +1,88 @@
+
+> client@0.1.0 build
+> next build --no-lint
+
+ ΓÜá Linting is disabled.
+   Γû▓ Next.js 15.1.6
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+request to https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap failed, reason: 
+
+Retrying 1/3...
+request to https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7W0Q5n-wU.woff2 failed, reason: 
+
+Retrying 1/3...
+request to https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1pL7W0Q5n-wU.woff2 failed, reason: 
+
+Retrying 1/3...
+request to https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa0ZL7W0Q5n-wU.woff2 failed, reason: 
+
+Retrying 1/3...
+request to https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2pL7W0Q5n-wU.woff2 failed, reason: 
+
+Retrying 1/3...
+request to https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2ZL7W0Q5n-wU.woff2 failed, reason: 
+
+Retrying 1/3...
+request to https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa0ZL7W0Q5n-wU.woff2 failed, reason: 
+
+Retrying 2/3...
+request to https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7W0Q5n-wU.woff2 failed, reason: 
+
+Retrying 2/3...
+request to https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2pL7W0Q5n-wU.woff2 failed, reason: 
+
+Retrying 2/3...
+request to https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1pL7W0Q5n-wU.woff2 failed, reason: 
+
+Retrying 2/3...
+ Γ£ô Compiled successfully
+   Checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/25) ...
+   Generating static pages (6/25) 
+   Generating static pages (12/25) 
+   Generating static pages (18/25) 
+ Γ£ô Generating static pages (25/25)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size     First Load JS
+Γöî Γùï /                                       13.2 kB         182 kB
+Γö£ Γùï /_not-found                             979 B           106 kB
+Γö£ ╞Æ /api/auth/login                         170 B           105 kB
+Γö£ ╞Æ /api/auth/register                      170 B           105 kB
+Γö£ ╞Æ /api/chat                               170 B           105 kB
+Γö£ ╞Æ /api/chat/[chatId]                      170 B           105 kB
+Γö£ ╞Æ /api/chat/[chatId]/message/[messageId]  170 B           105 kB
+Γö£ ╞Æ /api/chat/send                          170 B           105 kB
+Γö£ ╞Æ /api/chat/send-media                    170 B           105 kB
+Γö£ ╞Æ /api/health                             170 B           105 kB
+Γö£ ╞Æ /api/matches                            170 B           105 kB
+Γö£ ╞Æ /api/matches/swipe                      170 B           105 kB
+Γö£ ╞Æ /api/reports                            170 B           105 kB
+Γö£ ╞Æ /api/users/[id]                         170 B           105 kB
+Γö£ ╞Æ /api/users/discovery                    170 B           105 kB
+Γö£ ╞Æ /api/users/profile                      170 B           105 kB
+Γö£ ╞Æ /api/users/search                       170 B           105 kB
+Γö£ ╞Æ /call/[userId]                          23.9 kB         164 kB
+Γö£ Γùï /chat                                   3.73 kB         174 kB
+Γö£ ╞Æ /chat/[userId]                          11.1 kB         193 kB
+Γö£ Γùï /login                                  2.12 kB         172 kB
+Γö£ Γùï /matches                                2.41 kB         133 kB
+Γö£ Γùï /profile                                3.83 kB         170 kB
+Γö£ ╞Æ /profile/[id]                           3.19 kB         170 kB
+Γö£ Γùï /profile/edit                           3.85 kB         131 kB
+Γö£ Γùï /register                               2.29 kB         172 kB
+Γö£ Γùï /search                                 2.8 kB          172 kB
+Γöö Γùï /settings                               3.4 kB          130 kB
++ First Load JS shared by all               105 kB
+  Γö£ chunks/4bd1b696-e710565c3cc8e34b.js     52.9 kB
+  Γö£ chunks/517-4b492dd991067489.js          50.3 kB
+  Γöö other shared chunks (total)             1.97 kB
+
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+

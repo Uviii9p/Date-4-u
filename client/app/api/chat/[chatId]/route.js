@@ -13,7 +13,7 @@ export async function GET(req, { params }) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         }
 
-        const { userId } = await params;
+        const { chatId: userId } = await params;
 
         let chat = await Chat.findOne({
             members: { $all: [decoded.id.toString(), userId] }
