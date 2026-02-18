@@ -32,7 +32,7 @@ export async function GET(req) {
             query.gender = currentUser.genderPreference;
         }
 
-        const users = await User.find(query).limit(20);
+        const users = await User.find(query).select('-password').limit(20);
 
         // Sort by common interests matching score
         const sortedUsers = users.map(user => {

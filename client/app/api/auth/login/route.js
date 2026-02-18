@@ -5,18 +5,13 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
 const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    return jwt.sign({ id: id.toString() }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
 
 export async function POST(req) {
     try {
+        console.log('[Login API] Starting login...');
         await dbConnect();
-
-        // Ensure User model is properly loaded
-        if (!User || typeof User.findOne !== 'function') {
-            console.error("User model is not correctly initialized", User);
-            return NextResponse.json({ message: 'Database model error' }, { status: 500 });
-        }
 
         const body = await req.json();
         const { email, password } = body;
@@ -25,8 +20,17 @@ export async function POST(req) {
             return NextResponse.json({ message: 'Email and password are required' }, { status: 400 });
         }
 
+        console.log(`[Login API] Looking up user: ${email}`);
         const user = await User.findOne({ email });
-        if (user && (await bcrypt.compare(password, user.password))) {
+
+        if (!user) {
+            console.log(`[Login API] User not found: ${email}`);
+            return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (isMatch) {
+            console.log(`[Login API] Login successful for: ${email}`);
             const userObj = user.toObject();
             delete userObj.password;
 
@@ -35,10 +39,11 @@ export async function POST(req) {
                 token: generateToken(user._id)
             });
         } else {
+            console.log(`[Login API] Wrong password for: ${email}`);
             return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
         }
     } catch (error) {
-        console.error('Login API Error:', error);
-        return NextResponse.json({ message: error.message }, { status: 500 });
+        console.error('[Login API] Error:', error);
+        return NextResponse.json({ message: error.message || 'Login failed' }, { status: 500 });
     }
 }

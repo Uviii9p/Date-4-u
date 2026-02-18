@@ -16,10 +16,16 @@ const nextConfig = {
     JWT_SECRET: "sujal_secret_123",
   },
   async rewrites() {
-    // Check both potential env vars for flexibility
+    // On Vercel (production), do NOT proxy - let Next.js API routes handle requests directly
+    const isVercel = process.env.VERCEL === '1' || process.env.VERCEL === 'true';
+    if (isVercel) {
+      return [];
+    }
+
+    // In local development, proxy to the Express backend server
     let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000';
 
-    // Clean up the URL: if it ends with /api, remove it because we add it in the destination
+    // Clean up the URL
     if (backendUrl.endsWith('/api')) {
       backendUrl = backendUrl.slice(0, -4);
     }
