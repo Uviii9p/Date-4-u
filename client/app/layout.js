@@ -24,9 +24,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.className} relative`}>
+        <div className="mesh-background" />
+        <div className="bg-grain" />
         <AuthProvider>
-          <main className="pb-24 min-h-screen relative overflow-hidden flex flex-col items-center">
+          <main className="pb-24 min-h-screen relative flex flex-col items-center">
             <div className="w-full max-w-lg min-h-screen relative">
               {children}
             </div>

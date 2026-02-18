@@ -3,159 +3,118 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 import Link from 'next/link';
-import { Search, Heart, Flame, ImageIcon, Film } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MessageSquare, Sparkles, ChevronRight, Search } from 'lucide-react';
 
-export default function ChatList() {
+export default function Chats() {
     const { user } = useAuth();
     const [chats, setChats] = useState([]);
-    const [matches, setMatches] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchChats = async () => {
             try {
-                const [chatsRes, matchesRes] = await Promise.all([
-                    api.get('/chat'),
-                    api.get('/matches')
-                ]);
-                setChats(chatsRes.data);
-                setMatches(matchesRes.data);
+                const { data } = await api.get('/chat');
+                setChats(data);
             } catch (err) {
                 console.error(err);
             } finally {
                 setLoading(false);
             }
         };
+        fetchChats();
+    }, []);
 
-        if (user) fetchData();
-    }, [user]);
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-transparent flex items-center justify-center">
+                <div className="w-10 h-10 border-2 border-pink-500/20 border-t-pink-500 rounded-full animate-spin" />
+            </div>
+        );
+    }
 
     return (
-        <div className="min-h-screen bg-black text-white pb-24">
-            {/* Header */}
-            <div className="sticky top-0 z-30 bg-black/80 backdrop-blur-xl border-b border-white/5 p-6 flex justify-between items-center">
-                <h1 className="text-3xl font-black bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">Messages</h1>
-                <div className="w-10 h-10 rounded-full border border-pink-500/50 p-0.5">
-                    <img src={user?.images?.[0]} className="w-full h-full rounded-full object-cover" />
-                </div>
-            </div>
+        <div className="min-h-screen bg-transparent p-6 pb-32">
+            <header className="mb-10 pt-10">
+                <motion.h1
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="text-5xl font-black italic tracking-tighter text-white mb-2"
+                >
+                    INNER <span className="gradient-text">CIRCLE</span>
+                </motion.h1>
+                <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.4em] mb-10">Direct Transmissions</p>
 
-            <div className="p-6 space-y-8">
-                {/* Search */}
-                <div className="relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                <div className="relative flex items-center gap-3 glass-morphism p-4 rounded-3xl border-white/5 bg-white/2 ring-1 ring-white/5">
+                    <Search className="text-gray-600" size={18} />
                     <input
                         type="text"
-                        placeholder="Search matches or messages"
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-sm focus:bg-white/10 focus:border-pink-500/50 outline-none transition-all"
+                        placeholder="Search collective..."
+                        className="bg-transparent border-none outline-none font-bold text-sm w-full p-0 py-1"
                     />
                 </div>
+            </header>
 
-                {/* New Matches Horizontal Scroll */}
-                {matches.length > 0 && (
-                    <section>
-                        <div className="flex items-center gap-2 mb-4">
-                            <Heart size={16} className="text-pink-500 fill-pink-500" />
-                            <h2 className="text-sm font-black uppercase tracking-widest text-pink-500">New Matches</h2>
-                        </div>
-                        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
-                            {matches.map((match, i) => (
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: i * 0.1 }}
-                                    key={match._id}
+            <div className="space-y-4">
+                <AnimatePresence>
+                    {chats.map((chat, i) => {
+                        const recipient = chat.members.find(m => m._id !== user._id);
+                        const lastMsg = chat.messages?.[chat.messages.length - 1];
+
+                        return (
+                            <motion.div
+                                key={chat._id}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: i * 0.1 }}
+                            >
+                                <Link
+                                    href={`/chat/${recipient._id}`}
+                                    className="flex items-center gap-4 p-4 glass-card border-white/5 bg-white/2 hover:bg-white/5 transition-all active:scale-98 group"
                                 >
-                                    <Link href={`/chat/${match._id}`} className="flex flex-col items-center gap-2 min-w-[80px]">
-                                        <div className="relative p-1 rounded-full border-2 border-pink-500 shadow-[0_0_15px_-3px_rgba(236,72,153,0.5)]">
-                                            <div className="w-16 h-16 rounded-full overflow-hidden">
-                                                <img src={match.images?.[0]} className="w-full h-full object-cover" />
-                                            </div>
-                                            {match.onlineStatus && <div className="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-black rounded-full shadow-lg" />}
-                                        </div>
-                                        <span className="text-[11px] font-bold text-gray-300 truncate w-20 text-center">{match.name.split(' ')[0]}</span>
-                                    </Link>
-                                </motion.div>
-                            ))}
-                        </div>
-                    </section>
-                )}
-
-                {/* Message List */}
-                <section>
-                    <div className="flex items-center gap-2 mb-4">
-                        <Flame size={16} className="text-orange-500 fill-orange-500" />
-                        <h2 className="text-sm font-black uppercase tracking-widest text-orange-500">Messages</h2>
-                    </div>
-
-                    <div className="space-y-2">
-                        {chats.map((chat, i) => {
-                            const recipient = chat.members.find(m => m._id !== user?._id);
-                            const lastMsg = chat.messages[chat.messages.length - 1];
-                            const unreadCount = chat.messages.filter(m => !m.seen && m.senderId !== user?._id).length;
-
-                            return (
-                                <motion.div
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: i * 0.05 }}
-                                    key={chat._id}
-                                >
-                                    <Link
-                                        href={`/chat/${recipient._id}`}
-                                        className="flex items-center gap-4 p-4 rounded-3xl hover:bg-white/5 active:scale-[0.98] transition-all group"
-                                    >
-                                        <div className="relative">
+                                    <div className="relative flex-shrink-0">
+                                        <div className="w-16 h-16 rounded-[1.5rem] overflow-hidden border border-white/10">
                                             <img
-                                                src={recipient.images?.[0]}
-                                                className="w-16 h-16 rounded-3xl object-cover ring-2 ring-white/10 group-hover:ring-pink-500/50 transition-all"
+                                                src={recipient.images?.[0] || 'https://via.placeholder.com/200'}
+                                                className="w-full h-full object-cover transition-transform group-hover:scale-110"
                                                 alt=""
                                             />
-                                            {recipient.onlineStatus && <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 border-4 border-black rounded-full" />}
                                         </div>
+                                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-black" />
+                                    </div>
 
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex justify-between items-end mb-1">
-                                                <h3 className="font-black text-lg group-hover:text-pink-400 transition-colors">{recipient.name}</h3>
-                                                <span className="text-[10px] text-gray-500 font-bold">
-                                                    {lastMsg ? new Date(lastMsg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ""}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <p className={`text-sm truncate pr-4 flex items-center gap-1.5 ${unreadCount > 0 ? 'text-white font-bold' : 'text-gray-500'}`}>
-                                                    {lastMsg ? (
-                                                        lastMsg.type === 'image' ? (
-                                                            <><ImageIcon size={14} className="flex-shrink-0" /> Photo</>
-                                                        ) : lastMsg.type === 'video' ? (
-                                                            <><Film size={14} className="flex-shrink-0" /> Video</>
-                                                        ) : lastMsg.text
-                                                    ) : "Matched! Say hello 👋"}
-                                                </p>
-                                                {unreadCount > 0 && (
-                                                    <span className="flex-shrink-0 bg-pink-500 text-white text-[10px] font-black px-2 py-1 rounded-lg min-w-[20px] text-center shadow-[0_0_10px_rgba(236,72,153,0.5)]">
-                                                        {unreadCount}
-                                                    </span>
-                                                )}
-                                            </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-baseline mb-1">
+                                            <h3 className="font-black text-white truncate tracking-tight">{recipient.name}</h3>
+                                            <span className="text-[9px] font-bold text-gray-600 uppercase">
+                                                {lastMsg ? new Date(lastMsg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'NEW'}
+                                            </span>
                                         </div>
-                                    </Link>
-                                </motion.div>
-                            );
-                        })}
+                                        <p className="text-sm text-gray-500 truncate font-medium group-hover:text-gray-300 transition-colors">
+                                            {lastMsg ? lastMsg.text : 'Click to manifest conversation...'}
+                                        </p>
+                                    </div>
 
-                        {chats.length === 0 && !loading && (
-                            <div className="text-center py-20 bg-white/5 rounded-[2.5rem] mt-10 border border-dashed border-white/10">
-                                <Heart size={48} className="mx-auto text-gray-700 mb-4" />
-                                <h3 className="text-xl font-bold text-gray-400">Your inbox is empty</h3>
-                                <p className="text-gray-600 text-sm mt-2 px-10">Matches will appear here once you both swipe right!</p>
-                                <Link href="/" className="inline-block mt-8 text-pink-500 font-bold uppercase tracking-widest text-xs hover:underline">
-                                    Start Swiping
+                                    <ChevronRight className="text-gray-800 group-hover:text-pink-500 transition-colors" size={20} />
                                 </Link>
-                            </div>
-                        )}
+                            </motion.div>
+                        );
+                    })}
+                </AnimatePresence>
+
+                {chats.length === 0 && (
+                    <div className="text-center py-20 bg-white/2 rounded-[2.5rem] border border-dashed border-white/5">
+                        <MessageSquare className="text-gray-800 mx-auto mb-6 opacity-20" size={60} />
+                        <h2 className="text-xl font-black text-white italic mb-2">The Circle is Silent</h2>
+                        <p className="text-gray-500 text-sm font-medium px-10 leading-relaxed mb-10">Start swiping to manifest new direct links and expand your circle.</p>
+                        <button
+                            onClick={() => router.push('/')}
+                            className="btn-primary w-fit mx-auto py-4 px-10 text-[10px]"
+                        >
+                            Find Frequency
+                        </button>
                     </div>
-                </section>
+                )}
             </div>
         </div>
     );
