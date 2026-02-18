@@ -1,6 +1,7 @@
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
+import { CallProvider } from '@/context/CallContext';
 import BottomNav from '@/components/BottomNav';
 
 // Polyfills moved to client-side only to prevent breaking server-side build
@@ -28,12 +29,14 @@ export default function RootLayout({ children }) {
         <div className="mesh-background" />
         <div className="bg-grain" />
         <AuthProvider>
-          <main className="pb-24 min-h-screen relative flex flex-col items-center">
-            <div className="w-full max-w-lg min-h-screen relative">
-              {children}
-            </div>
-            <BottomNav />
-          </main>
+          <CallProvider>
+            <main className="pb-24 min-h-screen relative flex flex-col items-center">
+              <div className="w-full max-w-lg min-h-screen relative">
+                {children}
+              </div>
+              <BottomNav />
+            </main>
+          </CallProvider>
         </AuthProvider>
       </body>
     </html>

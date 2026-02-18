@@ -268,8 +268,18 @@ export default function ChatRoom() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <button className="p-3 bg-white/[0.03] hover:bg-white/[0.08] rounded-2xl text-white/40 hover:text-white transition-all border border-white/5"><Phone size={18} /></button>
-                    <button className="p-3 bg-white/[0.03] hover:bg-white/[0.08] rounded-2xl text-white/40 hover:text-white transition-all border border-white/5"><Video size={18} /></button>
+                    <button
+                        onClick={() => router.push(`/call/${userId}?type=audio`)}
+                        className="p-3 bg-white/[0.03] hover:bg-white/[0.08] rounded-2xl text-white/40 hover:text-white transition-all border border-white/5 shadow-lg"
+                    >
+                        <Phone size={18} />
+                    </button>
+                    <button
+                        onClick={() => router.push(`/call/${userId}?type=video`)}
+                        className="p-3 bg-white/[0.03] hover:bg-white/[0.08] rounded-2xl text-white/40 hover:text-white transition-all border border-white/5 shadow-lg"
+                    >
+                        <Video size={18} />
+                    </button>
                     <button onClick={() => setShowOptions(!showOptions)} className="p-3 bg-white/[0.03] hover:bg-white/[0.08] rounded-2xl text-white/40 hover:text-white transition-all border border-white/5"><MoreHorizontal size={18} /></button>
                 </div>
             </header>
