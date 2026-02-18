@@ -95,23 +95,27 @@ const getDiscoveryUsers = async (req, res) => {
 
 const searchUsers = async (req, res) => {
     try {
-        const { query } = req.query;
-        if (!query) {
+        const queryStr = req.query.query || req.query.q;
+        if (!queryStr) {
             return res.json([]);
         }
 
         const currentUser = await db.users.findById(req.user.id);
+        const searchQuery = queryStr.toLowerCase();
+
         const allUsers = await db.users.find({
             _id: { $ne: currentUser._id } // Exclude self
         });
 
-        // Simple name or ID search
-        const searchResults = allUsers.filter(user =>
-            user.name.toLowerCase().includes(query.toLowerCase()) ||
-            user._id === query
-        );
+        // Search across name, bio, and interests
+        const searchResults = allUsers.filter(user => {
+            const nameMatch = user.name?.toLowerCase().includes(searchQuery);
+            const bioMatch = user.bio?.toLowerCase().includes(searchQuery);
+            const interestMatch = user.interests?.some(i => i.toLowerCase().includes(searchQuery));
+            return nameMatch || bioMatch || interestMatch || user._id === queryStr;
+        });
 
-        res.json(searchResults.slice(0, 20)); // Limit results
+        res.json(searchResults.slice(0, 30));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

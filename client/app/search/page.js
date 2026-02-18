@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
-import { Search as SearchIcon, MapPin, Sparkles, Filter, SlidersHorizontal } from 'lucide-react';
+import { Search as SearchIcon, MapPin, Sparkles, Filter, SlidersHorizontal, ArrowLeft, Zap, Target } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
@@ -15,7 +15,8 @@ export default function SearchPage() {
         if (e) e.preventDefault();
         setLoading(true);
         try {
-            const { data } = await api.get(`/users/search?q=${query}`);
+            // Updated to use 'query' param to match backend expectations
+            const { data } = await api.get(`/users/search?query=${encodeURIComponent(query)}`);
             setResults(data);
         } catch (err) {
             console.error(err);
@@ -33,65 +34,93 @@ export default function SearchPage() {
     }, [query]);
 
     return (
-        <div className="min-h-screen bg-transparent p-6 pb-32">
-            <header className="mb-10 pt-10">
-                <motion.h1
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="text-5xl font-black italic tracking-tighter text-white mb-2"
-                >
-                    DISCOVER <span className="gradient-text">ENERGY</span>
-                </motion.h1>
-                <p className="text-gray-500 text-xs font-black uppercase tracking-[0.4em] mb-10">Search by name, interests or vibes</p>
+        <div className="min-h-screen bg-transparent p-6 pb-40">
+            {/* Mesh Effects */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+                <div className="absolute top-0 right-[-10%] w-[50%] h-[40%] bg-pink-500/5 blur-[120px] rounded-full" />
+                <div className="absolute bottom-0 left-[-10%] w-[50%] h-[40%] bg-blue-500/5 blur-[120px] rounded-full" />
+            </div>
 
-                {/* Search Bar Container */}
+            <header className="relative mb-12 pt-10 z-10">
+                <div className="flex items-center gap-4 mb-8">
+                    <button onClick={() => router.back()} className="p-3 glass-morphism rounded-2xl text-gray-500 hover:text-white transition-all">
+                        <ArrowLeft size={20} />
+                    </button>
+                    <div>
+                        <motion.h1
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="text-4xl font-black italic tracking-tighter text-white leading-none"
+                        >
+                            DISCOVER <span className="gradient-text">ENERGY</span>
+                        </motion.h1>
+                        <p className="text-gray-500 text-[9px] font-black uppercase tracking-[0.4em] mt-2">Scanning Global Collective</p>
+                    </div>
+                </div>
+
+                {/* Search Bar Pad */}
                 <div className="relative group">
-                    <div className="absolute inset-0 bg-pink-500/10 blur-2xl rounded-[2rem] opacity-0 group-focus-within:opacity-100 transition-opacity" />
-                    <div className="relative flex items-center gap-4 glass-card p-2 pl-6 overflow-hidden border-white/10 ring-1 ring-white/5">
-                        <SearchIcon className="text-gray-500 group-focus-within:text-pink-500 transition-colors" size={20} />
+                    <div className="absolute -inset-1 bg-gradient-to-r from-pink-500/20 to-purple-600/20 blur opacity-0 group-focus-within:opacity-100 transition duration-500" />
+                    <div className="relative flex items-center gap-4 glass-card p-3 pl-8 overflow-hidden bg-black/40 border-white/10 ring-1 ring-white/5 rounded-[2.5rem]">
+                        <SearchIcon className="text-gray-500 group-focus-within:text-pink-500 transition-colors" size={22} />
                         <input
                             type="text"
-                            placeholder="Find your frequency..."
-                            className="flex-1 bg-transparent border-none outline-none py-3 font-bold text-white text-lg placeholder:text-gray-700"
+                            placeholder="Type a name or interest..."
+                            className="flex-1 bg-transparent border-none outline-none py-3 font-bold text-white text-lg placeholder:text-gray-800"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                         />
-                        <button className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-all">
-                            <SlidersHorizontal size={18} />
+                        <button className="w-14 h-14 rounded-full bg-white/5 flex items-center justify-center text-gray-500 hover:text-white transition-all border border-white/5">
+                            <SlidersHorizontal size={20} />
                         </button>
                     </div>
                 </div>
             </header>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="relative z-10 grid grid-cols-2 gap-5">
                 <AnimatePresence mode="popLayout">
                     {results.map((profile, i) => (
                         <motion.div
                             key={profile._id}
-                            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                            initial={{ opacity: 0, y: 30, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                            transition={{ delay: i * 0.05 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{
+                                type: "spring",
+                                stiffness: 200,
+                                damping: 20,
+                                delay: i * 0.03
+                            }}
+                            whileHover={{ y: -5 }}
                             onClick={() => router.push(`/profile/${profile._id}`)}
-                            className="relative aspect-[3/4.5] rounded-3xl overflow-hidden glass-card border-white/5 group cursor-pointer"
+                            className="relative aspect-[3/4.8] rounded-[2.5rem] overflow-hidden glass-card border-white/5 group bg-white/[0.02] shadow-2xl"
                         >
                             <img
-                                src={profile.images?.[0] || `https://images.unsplash.com/photo-${1500000000000 + (profile.age * 1000000)}?w=400`}
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                src={profile.images?.[0] || (profile.gender === 'female' ? 'https://images.unsplash.com/photo-1494790108377-be9c29b29330' : 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e')}
+                                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                                 alt={profile.name}
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent pointer-events-none" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent pointer-events-none" />
 
-                            <div className="absolute bottom-4 left-4 right-4 text-white">
-                                <h3 className="text-lg font-black tracking-tight leading-tight mb-1 truncate">
-                                    {profile.name}, {profile.age}
+                            {/* Verification Chip */}
+                            <div className="absolute top-4 right-4 p-1.5 px-3 bg-black/40 backdrop-blur-md border border-white/10 rounded-full flex items-center gap-1">
+                                <Zap size={10} className="text-yellow-500" />
+                                <span className="text-[7px] font-black uppercase text-white/50 tracking-tighter italic">Lvl {profile.age - 15}</span>
+                            </div>
+
+                            <div className="absolute bottom-6 left-6 right-6 text-white">
+                                <h3 className="text-xl font-black tracking-tighter leading-none mb-1 group-hover:text-pink-400 transition-colors truncate">
+                                    {profile.name}
                                 </h3>
-                                <div className="flex items-center gap-1 text-[8px] font-black uppercase text-pink-500 tracking-widest opacity-80 mb-2">
-                                    <MapPin size={10} strokeWidth={3} /> {Math.floor(Math.random() * 10) + 1} KM
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                                    <span className="text-[8px] font-black uppercase text-white/40 tracking-widest">{profile.age} YRS • ONLINE</span>
                                 </div>
-                                <div className="flex flex-wrap gap-1">
+
+                                <div className="flex flex-wrap gap-1.5">
                                     {profile.interests?.slice(0, 2).map((interest, idx) => (
-                                        <span key={idx} className="px-2 py-0.5 bg-white/5 border border-white/10 rounded-md text-[7px] font-black uppercase tracking-widest">
+                                        <span key={idx} className="px-2.5 py-1 bg-white/5 border border-white/10 rounded-lg text-[7px] font-black uppercase tracking-widest text-white/70">
                                             {interest}
                                         </span>
                                     ))}
@@ -103,21 +132,35 @@ export default function SearchPage() {
             </div>
 
             {loading && (
-                <div className="flex justify-center py-20">
-                    <div className="w-10 h-10 border-2 border-pink-500/20 border-t-pink-500 rounded-full animate-spin" />
+                <div className="flex flex-col items-center justify-center py-32 space-y-4">
+                    <div className="w-14 h-14 border-2 border-pink-500/10 border-t-pink-500 rounded-full animate-spin shadow-[0_0_20px_rgba(236,72,153,0.3)]" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-pink-500/50 animate-pulse">Syncing Frequency</p>
                 </div>
             )}
 
             {!loading && query && results.length === 0 && (
-                <div className="text-center py-20 bg-white/2 rounded-[2rem] border border-dashed border-white/5">
-                    <Sparkles size={40} className="text-gray-700 mx-auto mb-4" />
-                    <p className="text-gray-500 font-bold text-sm tracking-tight italic">No signals found in this bandwidth</p>
-                </div>
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-center py-24 bg-white/[0.02] rounded-[3rem] border border-dashed border-white/10"
+                >
+                    <div className="w-20 h-20 bg-pink-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Target size={32} className="text-pink-500/50" />
+                    </div>
+                    <p className="text-white font-black text-lg tracking-tight mb-2">Signal Lost</p>
+                    <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">No profiles aligned with this frequency</p>
+                </motion.div>
             )}
 
             {!query && results.length === 0 && (
-                <div className="text-center py-20 opacity-30">
-                    <h2 className="text-8xl font-black italic tracking-tighter text-white/5 select-none">SEARCH</h2>
+                <div className="text-center py-32">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 0.03, scale: 1 }}
+                        className="text-[140px] font-black italic tracking-tighter leading-none select-none text-white overflow-hidden whitespace-nowrap"
+                    >
+                        COLLECTIVE
+                    </motion.div>
                 </div>
             )}
         </div>

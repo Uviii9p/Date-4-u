@@ -1,14 +1,16 @@
 "use client";
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 import { useRouter } from 'next/navigation';
-import { Camera, X, Plus, ChevronLeft, Check, Trash2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Camera, X, Plus, ChevronLeft, Check, Trash2, Shield, Info, Sparkles, Zap } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function EditProfile() {
     const { user, setUser } = useAuth();
     const router = useRouter();
+    const fileInputRef = useRef();
+
     const [formData, setFormData] = useState({
         name: user?.name || '',
         bio: user?.bio || '',
@@ -34,12 +36,14 @@ export default function EditProfile() {
         newPreviews.splice(index, 1);
         setPreviews(newPreviews);
 
-        // Also remove from files if it was a new upload
-        // For existing images, we'd ideally send the updated list to backend
+        // Handle removing from files if newly added
+        // Existing images handled by backend when sending previews? 
+        // Actually, this implementation appends. For a true 'sync', we'd need a better backend strategy.
+        // But let's keep it functional.
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         setLoading(true);
         const data = new FormData();
         data.append('name', formData.name);
@@ -59,9 +63,7 @@ export default function EditProfile() {
             router.push('/profile');
         } catch (err) {
             console.error('Update profile error:', err);
-            const msg = err.response?.data?.message || 'Update failed';
-            const details = err.response?.data?.details;
-            alert(details ? `${msg}: ${details.join(', ')}` : msg);
+            alert(err.response?.data?.message || 'Update failed');
         } finally {
             setLoading(false);
         }
@@ -70,81 +72,115 @@ export default function EditProfile() {
     if (!user) return null;
 
     return (
-        <div className="min-h-screen bg-[#0A0A0A] text-white">
-            {/* Navbar */}
-            <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5 p-4 flex justify-between items-center">
-                <button onClick={() => router.back()} className="p-2 hover:bg-white/10 rounded-full">
-                    <ChevronLeft size={24} />
-                </button>
-                <h1 className="text-sm font-black uppercase tracking-widest">Edit Profile</h1>
-                <button
-                    onClick={handleSubmit}
-                    disabled={loading}
-                    className="p-2 text-pink-500 hover:bg-pink-500/10 rounded-full transition-colors"
-                >
-                    {loading ? <div className="w-6 h-6 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" /> : <Check size={24} />}
-                </button>
+        <div className="min-h-screen bg-black text-white relative">
+            {/* Immersive Background */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+                <div className="absolute top-0 right-[-20%] w-[60%] h-[50%] bg-pink-500/5 blur-[120px] rounded-full" />
+                <div className="absolute bottom-0 left-[-20%] w-[60%] h-[50%] bg-purple-500/5 blur-[120px] rounded-full" />
             </div>
 
-            <div className="p-6 pb-32 max-w-2xl mx-auto space-y-10">
-
-                {/* Media Section */}
-                <section>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-6 px-1">Profile Photos</h3>
-                    <div className="grid grid-cols-3 gap-3">
-                        {[...Array(6)].map((_, i) => (
-                            <div key={i} className="relative aspect-[3/4] rounded-3xl overflow-hidden glass-card border-white/5 bg-white/5 group">
-                                {previews[i] ? (
-                                    <>
-                                        <img src={previews[i]} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="" />
-                                        <button
-                                            type="button"
-                                            className="absolute top-2 right-2 p-2 bg-black/60 backdrop-blur-md rounded-xl text-red-500 opacity-0 group-hover:opacity-100 transition-all"
-                                            onClick={() => removeImage(i)}
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
-                                        <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/40 backdrop-blur-md rounded-lg text-[8px] font-black uppercase">
-                                            Photo {i + 1}
-                                        </div>
-                                    </>
-                                ) : (
-                                    <label className="w-full h-full flex items-center justify-center cursor-pointer hover:bg-white/10 transition-colors">
-                                        <div className="flex flex-col items-center gap-2">
-                                            <Plus size={24} className="text-pink-500" />
-                                            <span className="text-[8px] font-black uppercase tracking-widest text-gray-500">Add</span>
-                                        </div>
-                                        <input type="file" multiple className="hidden" onChange={handleFileChange} />
-                                    </label>
-                                )}
-                            </div>
-                        ))}
+            {/* Premium Header */}
+            <header className="sticky top-0 z-50 bg-black/60 backdrop-blur-3xl border-b border-white/5 p-6 flex justify-between items-center px-8">
+                <div className="flex items-center gap-4">
+                    <button onClick={() => router.back()} className="p-3 glass-morphism rounded-2xl text-gray-400 hover:text-white transition-all">
+                        <ChevronLeft size={22} />
+                    </button>
+                    <div>
+                        <h1 className="text-xl font-black italic tracking-tighter leading-none">RE-INITIALIZE</h1>
+                        <p className="text-[8px] font-black uppercase tracking-[0.4em] text-pink-500 mt-1">Identity Modification</p>
                     </div>
-                    <p className="text-[10px] text-gray-600 mt-4 text-center font-bold italic">Hold and drag to reorder (Coming Soon)</p>
+                </div>
+
+                <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl disabled:opacity-50 transition-all"
+                >
+                    {loading ? (
+                        <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                    ) : (
+                        <>
+                            <Check size={16} strokeWidth={3} />
+                            <span>Synchronize</span>
+                        </>
+                    )}
+                </motion.button>
+            </header>
+
+            <div className="relative z-10 p-8 pb-40 max-w-2xl mx-auto space-y-12">
+
+                {/* Visual Data (Images) */}
+                <section>
+                    <div className="flex items-center justify-between mb-8 px-2">
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500">Visual Data Points</h3>
+                        <span className="text-[9px] font-black text-white/30 uppercase">{previews.length} / 6 Captured</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <AnimatePresence>
+                            {[...Array(6)].map((_, i) => (
+                                <motion.div
+                                    key={i}
+                                    layout
+                                    className="relative aspect-[3/4] rounded-[2rem] overflow-hidden glass-card border-white/5 bg-white/[0.02] group ring-1 ring-white/5"
+                                >
+                                    {previews[i] ? (
+                                        <>
+                                            <img src={previews[i]} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            <button
+                                                type="button"
+                                                className="absolute top-4 right-4 p-3 bg-black/60 backdrop-blur-xl rounded-2xl text-red-500 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white"
+                                                onClick={() => removeImage(i)}
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                            <div className="absolute bottom-4 left-4 px-3 py-1 bg-black/40 backdrop-blur-md rounded-xl text-[7px] font-black uppercase text-white/50 tracking-widest border border-white/10">
+                                                Bit {i + 1}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-white/[0.05] transition-all group">
+                                            <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-dashed border-white/10 flex items-center justify-center group-hover:border-pink-500/50 group-hover:bg-pink-500/5 transition-all">
+                                                <Plus size={20} className="text-gray-600 group-hover:text-pink-500" />
+                                            </div>
+                                            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-gray-700 mt-4">Initialize</span>
+                                            <input type="file" multiple className="hidden" onChange={handleFileChange} />
+                                        </label>
+                                    )}
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+                    </div>
                 </section>
 
-                {/* Basic Info */}
-                <form onSubmit={handleSubmit} className="space-y-8">
-                    <div className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="group">
-                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-3 block px-1">Full Name</label>
-                                <input
-                                    type="text"
-                                    value={formData.name}
-                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full bg-white/5 rounded-2xl p-4 outline-none border border-white/5 focus:border-pink-500/50 focus:bg-white/10 transition-all text-sm font-bold"
-                                    placeholder="Your Name"
-                                    required
-                                />
+                {/* Identity Manifest */}
+                <form onSubmit={handleSubmit} className="space-y-10">
+                    <div className="space-y-10">
+                        {/* Name & Age Row */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 px-2">Alias / Name</label>
+                                <div className="relative group">
+                                    <input
+                                        type="text"
+                                        value={formData.name}
+                                        onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                        className="w-full bg-white/[0.03] rounded-2xl p-5 outline-none border border-white/5 focus:border-pink-500/50 focus:bg-white/[0.06] transition-all text-sm font-bold placeholder:text-gray-800 ring-1 ring-white/5"
+                                        placeholder="Identity Label"
+                                        required
+                                    />
+                                </div>
                             </div>
-                            <div className="group">
-                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-3 block px-1">Age</label>
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 px-2">Cycles / Age</label>
                                 <input
                                     type="number"
                                     value={formData.age}
                                     onChange={e => setFormData({ ...formData, age: e.target.value })}
-                                    className="w-full bg-white/5 rounded-2xl p-4 outline-none border border-white/5 focus:border-pink-500/50 focus:bg-white/10 transition-all text-sm font-bold"
+                                    className="w-full bg-white/[0.03] rounded-2xl p-5 outline-none border border-white/5 focus:border-pink-500/50 focus:bg-white/[0.06] transition-all text-sm font-bold ring-1 ring-white/5"
                                     placeholder="18+"
                                     min="18"
                                     required
@@ -152,70 +188,96 @@ export default function EditProfile() {
                             </div>
                         </div>
 
-                        <div className="group">
-                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-3 block px-1">About Me</label>
+                        {/* Bio Station */}
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-center px-2">
+                                <label className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500">Transmission Sequence (Bio)</label>
+                                <span className={`${formData.bio.length > 150 ? 'text-pink-500' : 'text-gray-700'} text-[8px] font-black`}>{formData.bio.length} / 250</span>
+                            </div>
                             <textarea
                                 value={formData.bio}
+                                maxLength={250}
                                 onChange={e => setFormData({ ...formData, bio: e.target.value })}
-                                className="w-full bg-white/5 rounded-3xl p-5 outline-none border border-white/5 focus:border-pink-500/50 focus:bg-white/10 transition-all h-32 resize-none font-medium leading-relaxed"
-                                placeholder="Tell them something they won't find on your Instagram..."
+                                className="w-full bg-white/[0.03] rounded-[2rem] p-6 outline-none border border-white/5 focus:border-pink-500/50 focus:bg-white/[0.06] transition-all h-40 resize-none font-medium leading-relaxed text-white/80 italic ring-1 ring-white/5"
+                                placeholder="Broadcast your frequency to the collective..."
                             />
                         </div>
 
-                        <div className="group">
-                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-3 block px-1 transition-colors group-focus-within:text-pink-500">My Interests</label>
+                        {/* Frequency Interests */}
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 px-2">Alignment Markers (Interests)</label>
+                            <div className="flex flex-wrap gap-2 mb-4">
+                                {formData.interests.split(',').map((tag, i) => tag.trim() && (
+                                    <span key={i} className="px-3 py-1 bg-pink-500/10 border border-pink-500/20 rounded-lg text-[9px] font-black uppercase text-pink-500 tracking-wider flex items-center gap-1">
+                                        <Zap size={10} /> {tag.trim()}
+                                    </span>
+                                ))}
+                            </div>
                             <input
                                 type="text"
                                 value={formData.interests}
                                 onChange={e => setFormData({ ...formData, interests: e.target.value })}
-                                className="w-full bg-white/5 rounded-2xl p-4 outline-none border border-white/5 focus:border-pink-500/50 focus:bg-white/10 transition-all text-sm font-bold"
-                                placeholder="Ex: Travel, Coffee, Coding..."
+                                className="w-full bg-white/[0.03] rounded-2xl p-5 outline-none border border-white/5 focus:border-pink-500/50 focus:bg-white/[0.06] transition-all text-sm font-bold ring-1 ring-white/5"
+                                placeholder="Coding, Travel, Techno, Sci-Fi..."
                             />
-                            <p className="text-[9px] text-gray-600 mt-2 italic px-1">Separate with commas</p>
+                            <div className="flex items-center gap-2 px-2 opacity-30">
+                                <Info size={10} />
+                                <p className="text-[8px] font-black uppercase tracking-widest">Separate with commas for optimal algorithmic indexing</p>
+                            </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="group">
-                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-3 block px-1">Gender</label>
-                                <div className="relative">
+                        {/* Orientation Config */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-10">
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 px-2">Self Calibration</label>
+                                <div className="relative group">
                                     <select
                                         value={formData.gender}
                                         onChange={e => setFormData({ ...formData, gender: e.target.value })}
-                                        className="w-full bg-white/5 rounded-2xl p-4 pr-10 outline-none border border-white/5 appearance-none font-bold text-sm focus:border-pink-500/50"
+                                        className="w-full bg-white/[0.03] rounded-2xl p-5 pr-12 outline-none border border-white/5 appearance-none font-bold text-sm focus:border-pink-500/50 transition-all ring-1 ring-white/5"
                                     >
-                                        <option value="male" className="bg-neutral-900">Male</option>
-                                        <option value="female" className="bg-neutral-900">Female</option>
-                                        <option value="other" className="bg-neutral-900">Other</option>
+                                        <option value="male" className="bg-neutral-950">Male Core</option>
+                                        <option value="female" className="bg-neutral-950">Female Core</option>
+                                        <option value="other" className="bg-neutral-950">Hybrid / Other</option>
                                     </select>
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">▼</div>
+                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-20 group-focus-within:opacity-100 transition-opacity">▼</div>
                                 </div>
                             </div>
 
-                            <div className="group">
-                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-3 block px-1">Looking for</label>
-                                <div className="relative">
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 px-2">Target Alignment</label>
+                                <div className="relative group">
                                     <select
                                         value={formData.genderPreference}
                                         onChange={e => setFormData({ ...formData, genderPreference: e.target.value })}
-                                        className="w-full bg-white/5 rounded-2xl p-4 pr-10 outline-none border border-white/5 appearance-none font-bold text-sm focus:border-pink-500/50"
+                                        className="w-full bg-white/[0.03] rounded-2xl p-5 pr-12 outline-none border border-white/5 appearance-none font-bold text-sm focus:border-pink-500/50 transition-all ring-1 ring-white/5"
                                     >
-                                        <option value="male" className="bg-neutral-900">Men</option>
-                                        <option value="female" className="bg-neutral-900">Women</option>
-                                        <option value="both" className="bg-neutral-900">Everyone</option>
+                                        <option value="male" className="bg-neutral-950">Male Frequency</option>
+                                        <option value="female" className="bg-neutral-950">Female Frequency</option>
+                                        <option value="both" className="bg-neutral-950">Multichannel (Everyone)</option>
                                     </select>
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">▼</div>
+                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-20 group-focus-within:opacity-100 transition-opacity">▼</div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full py-5 btn-primary text-sm font-black uppercase tracking-widest shadow-[0_10px_30px_rgba(236,72,153,0.3)] mt-8"
-                    >
-                        {loading ? 'Saving Changes...' : 'Save Profile'}
-                    </button>
+                    {/* Integrated Save Block */}
+                    <div className="glass-card p-6 bg-white/[0.01] border-white/5 rounded-[2.5rem] flex items-center justify-between">
+                        <div className="flex items-center gap-3 px-2">
+                            <div className="w-10 h-10 rounded-full bg-pink-500/10 flex items-center justify-center border border-pink-500/20">
+                                <Sparkles size={18} className="text-pink-500" />
+                            </div>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-white/40">Ready to <br />Broadcast?</p>
+                        </div>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="px-10 py-5 bg-gradient-to-r from-pink-500 to-purple-600 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-[0_20px_40px_rgba(236,72,153,0.2)] hover:scale-105 transition-all"
+                        >
+                            Sync Identity
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
