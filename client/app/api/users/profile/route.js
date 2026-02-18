@@ -46,6 +46,16 @@ export async function PUT(req) {
             if (formData.has('gender')) updates.gender = formData.get('gender');
             if (formData.has('genderPreference')) updates.genderPreference = formData.get('genderPreference');
 
+            const imagesStr = formData.get('images');
+            if (imagesStr) {
+                try {
+                    updates.images = JSON.parse(imagesStr);
+                } catch {
+                    // If it's a single string or invalid JSON
+                    updates.images = [imagesStr];
+                }
+            }
+
             const interestsStr = formData.get('interests');
             if (interestsStr) {
                 try {

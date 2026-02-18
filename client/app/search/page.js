@@ -11,11 +11,13 @@ export default function SearchPage() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
+    const femalePlaceholder = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1974&auto=format&fit=crop";
+    const malePlaceholder = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1974&auto=format&fit=crop";
+
     const handleSearch = async (e) => {
         if (e) e.preventDefault();
         setLoading(true);
         try {
-            // Updated to use 'query' param to match backend expectations
             const { data } = await api.get(`/users/search?query=${encodeURIComponent(query)}`);
             setResults(data);
         } catch (err) {
@@ -33,6 +35,71 @@ export default function SearchPage() {
         return () => clearTimeout(delayDebounceFn);
     }, [query]);
 
+    const ProfileCard = ({ profile, i }) => {
+        const [imgError, setImgError] = useState(false);
+
+        // Clean the image URL - handle relative paths from local dev
+        const getDisplayImg = () => {
+            if (imgError || !profile.images?.[0]) {
+                return profile.gender === 'female' ? femalePlaceholder : malePlaceholder;
+            }
+            const img = profile.images[0];
+            if (img.startsWith('http')) return img;
+
+            // For local dev /uploads/
+            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:5000';
+            return `${backendUrl}${img}`;
+        };
+
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 20,
+                    delay: i * 0.03
+                }}
+                whileHover={{ y: -5 }}
+                onClick={() => router.push(`/profile/${profile._id}`)}
+                className="relative aspect-[3/4.8] rounded-[2.5rem] overflow-hidden glass-card border-white/5 group bg-white/[0.02] shadow-2xl"
+            >
+                <img
+                    src={getDisplayImg()}
+                    onError={() => setImgError(true)}
+                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                    alt={profile.name}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent pointer-events-none" />
+
+                <div className="absolute top-4 right-4 p-1.5 px-3 bg-black/40 backdrop-blur-md border border-white/10 rounded-full flex items-center gap-1">
+                    <Zap size={10} className="text-yellow-500" />
+                    <span className="text-[7px] font-black uppercase text-white/50 tracking-tighter italic">Lvl {profile.age - 15}</span>
+                </div>
+
+                <div className="absolute bottom-6 left-6 right-6 text-white">
+                    <h3 className="text-xl font-black tracking-tighter leading-none mb-1 group-hover:text-pink-400 transition-colors truncate">
+                        {profile.name}
+                    </h3>
+                    <div className="flex items-center gap-2 mb-3">
+                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                        <span className="text-[8px] font-black uppercase text-white/40 tracking-widest">{profile.age} YRS • ONLINE</span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5">
+                        {profile.interests?.slice(0, 2).map((interest, idx) => (
+                            <span key={idx} className="px-2.5 py-1 bg-white/5 border border-white/10 rounded-lg text-[7px] font-black uppercase tracking-widest text-white/70">
+                                {interest}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            </motion.div>
+        );
+    };
+
     return (
         <div className="min-h-screen bg-transparent p-6 pb-40">
             {/* Mesh Effects */}
@@ -43,7 +110,7 @@ export default function SearchPage() {
 
             <header className="relative mb-12 pt-10 z-10">
                 <div className="flex items-center gap-4 mb-8">
-                    <button onClick={() => router.back()} className="p-3 glass-morphism rounded-2xl text-gray-500 hover:text-white transition-all">
+                    <button onClick={() => router.back()} className="p-3 glass-morphism rounded-2xl text-gray-400 hover:text-white transition-all">
                         <ArrowLeft size={20} />
                     </button>
                     <div>
@@ -81,52 +148,7 @@ export default function SearchPage() {
             <div className="relative z-10 grid grid-cols-2 gap-5">
                 <AnimatePresence mode="popLayout">
                     {results.map((profile, i) => (
-                        <motion.div
-                            key={profile._id}
-                            initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            transition={{
-                                type: "spring",
-                                stiffness: 200,
-                                damping: 20,
-                                delay: i * 0.03
-                            }}
-                            whileHover={{ y: -5 }}
-                            onClick={() => router.push(`/profile/${profile._id}`)}
-                            className="relative aspect-[3/4.8] rounded-[2.5rem] overflow-hidden glass-card border-white/5 group bg-white/[0.02] shadow-2xl"
-                        >
-                            <img
-                                src={profile.images?.[0] || (profile.gender === 'female' ? 'https://images.unsplash.com/photo-1494790108377-be9c29b29330' : 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e')}
-                                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                                alt={profile.name}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent pointer-events-none" />
-
-                            {/* Verification Chip */}
-                            <div className="absolute top-4 right-4 p-1.5 px-3 bg-black/40 backdrop-blur-md border border-white/10 rounded-full flex items-center gap-1">
-                                <Zap size={10} className="text-yellow-500" />
-                                <span className="text-[7px] font-black uppercase text-white/50 tracking-tighter italic">Lvl {profile.age - 15}</span>
-                            </div>
-
-                            <div className="absolute bottom-6 left-6 right-6 text-white">
-                                <h3 className="text-xl font-black tracking-tighter leading-none mb-1 group-hover:text-pink-400 transition-colors truncate">
-                                    {profile.name}
-                                </h3>
-                                <div className="flex items-center gap-2 mb-3">
-                                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                                    <span className="text-[8px] font-black uppercase text-white/40 tracking-widest">{profile.age} YRS • ONLINE</span>
-                                </div>
-
-                                <div className="flex flex-wrap gap-1.5">
-                                    {profile.interests?.slice(0, 2).map((interest, idx) => (
-                                        <span key={idx} className="px-2.5 py-1 bg-white/5 border border-white/10 rounded-lg text-[7px] font-black uppercase tracking-widest text-white/70">
-                                            {interest}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        </motion.div>
+                        <ProfileCard key={profile._id} profile={profile} i={i} />
                     ))}
                 </AnimatePresence>
             </div>

@@ -1,10 +1,11 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import { Heart, X, Star, Info, MapPin, Sparkles, ShieldCheck } from 'lucide-react';
 
 const SwipeCard = ({ user, onSwipe, isTop }) => {
     const [currentImgIndex, setCurrentImgIndex] = useState(0);
+    const [imgError, setImgError] = useState(false);
     const x = useMotionValue(0);
     const rotate = useTransform(x, [-300, 300], [-30, 30]);
     const opacity = useTransform(x, [-300, -250, 0, 250, 300], [0, 1, 1, 1, 0]);
@@ -28,8 +29,10 @@ const SwipeCard = ({ user, onSwipe, isTop }) => {
         e.stopPropagation();
         if (currentImgIndex < (user.images?.length || 1) - 1) {
             setCurrentImgIndex(prev => prev + 1);
+            setImgError(false);
         } else {
             setCurrentImgIndex(0); // Loop
+            setImgError(false);
         }
     };
 
@@ -37,11 +40,24 @@ const SwipeCard = ({ user, onSwipe, isTop }) => {
         e.stopPropagation();
         if (currentImgIndex > 0) {
             setCurrentImgIndex(prev => prev - 1);
+            setImgError(false);
         }
     };
 
     // Better fallback image logic
-    const fallbackImage = `https://images.unsplash.com/photo-${user.gender === 'female' ? '1494790108377-be9c29b29330' : '1500648767791-00dcc994a43e'}?w=800&q=80`;
+    const femalePlaceholder = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1974&auto=format&fit=crop";
+    const malePlaceholder = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1974&auto=format&fit=crop";
+    const fallbackImage = user.gender === 'female' ? femalePlaceholder : malePlaceholder;
+
+    const getDisplayImg = () => {
+        if (imgError || !user.images?.[currentImgIndex]) {
+            return fallbackImage;
+        }
+        const img = user.images[currentImgIndex];
+        if (img.startsWith('http')) return img;
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:5000';
+        return `${backendUrl}${img}`;
+    };
 
     return (
         <motion.div
@@ -65,13 +81,13 @@ const SwipeCard = ({ user, onSwipe, isTop }) => {
                     <AnimatePresence mode="wait">
                         <motion.img
                             key={currentImgIndex}
-                            src={user.images?.[currentImgIndex] || fallbackImage}
+                            src={getDisplayImg()}
+                            onError={() => setImgError(true)}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
                             alt={user.name}
-                            onError={(e) => { e.target.src = fallbackImage; }}
                         />
                     </AnimatePresence>
 
@@ -115,7 +131,7 @@ const SwipeCard = ({ user, onSwipe, isTop }) => {
 
                         <div className="flex items-center gap-2 mb-4 text-white/60">
                             <MapPin size={14} className="text-pink-500 flex-shrink-0" />
-                            <span className="text-[10px] font-bold tracking-wide italic whitespace-nowrap">{(user._id.charCodeAt(0) % 5) + 1} miles away</span>
+                            <span className="text-[10px] font-bold tracking-wide italic whitespace-nowrap">{(user._id?.toString().charCodeAt(0) % 5 || 0) + 1} miles away</span>
                             <span className="opacity-20">•</span>
                             <ShieldCheck size={14} className="text-blue-400 flex-shrink-0" />
                             <span className="text-[10px] font-bold">Verified</span>

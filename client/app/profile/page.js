@@ -9,19 +9,35 @@ export default function Profile() {
     const { user, logout } = useAuth();
     const router = useRouter();
     const [imgIndex, setImgIndex] = useState(0);
+    const [imgError, setImgError] = useState(false);
+
+    const femalePlaceholder = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1974&auto=format&fit=crop";
+    const malePlaceholder = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1974&auto=format&fit=crop";
 
     if (!user) return null;
 
     const nextImg = () => {
         if (user.images?.length > 1) {
             setImgIndex((prev) => (prev + 1) % user.images.length);
+            setImgError(false);
         }
     };
 
     const prevImg = () => {
         if (user.images?.length > 1) {
             setImgIndex((prev) => (prev - 1 + user.images.length) % user.images.length);
+            setImgError(false);
         }
+    };
+
+    const getProfileImg = () => {
+        if (imgError || !user.images?.[imgIndex]) {
+            return user.gender === 'female' ? femalePlaceholder : malePlaceholder;
+        }
+        const img = user.images[imgIndex];
+        if (img.startsWith('http')) return img;
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:5000';
+        return `${backendUrl}${img}`;
     };
 
     return (
@@ -87,7 +103,8 @@ export default function Profile() {
                     <AnimatePresence mode="wait">
                         <motion.img
                             key={imgIndex}
-                            src={user.images?.[imgIndex] || 'https://via.placeholder.com/600'}
+                            src={getProfileImg()}
+                            onError={() => setImgError(true)}
                             initial={{ opacity: 0, scale: 1.1 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
