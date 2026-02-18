@@ -38,15 +38,12 @@ export default function SearchPage() {
     const ProfileCard = ({ profile, i }) => {
         const [imgError, setImgError] = useState(false);
 
-        // Clean the image URL - handle relative paths from local dev
         const getDisplayImg = () => {
             if (imgError || !profile.images?.[0]) {
                 return profile.gender === 'female' ? femalePlaceholder : malePlaceholder;
             }
             const img = profile.images[0];
-            if (img.startsWith('http')) return img;
-
-            // For local dev /uploads/
+            if (img.startsWith('http') || img.startsWith('data:')) return img;
             const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:5000';
             return `${backendUrl}${img}`;
         };
@@ -102,7 +99,6 @@ export default function SearchPage() {
 
     return (
         <div className="min-h-screen bg-transparent p-6 pb-40">
-            {/* Mesh Effects */}
             <div className="fixed inset-0 pointer-events-none z-0">
                 <div className="absolute top-0 right-[-10%] w-[50%] h-[40%] bg-pink-500/5 blur-[120px] rounded-full" />
                 <div className="absolute bottom-0 left-[-10%] w-[50%] h-[40%] bg-blue-500/5 blur-[120px] rounded-full" />
@@ -125,7 +121,6 @@ export default function SearchPage() {
                     </div>
                 </div>
 
-                {/* Search Bar Pad */}
                 <div className="relative group">
                     <div className="absolute -inset-1 bg-gradient-to-r from-pink-500/20 to-purple-600/20 blur opacity-0 group-focus-within:opacity-100 transition duration-500" />
                     <div className="relative flex items-center gap-4 glass-card p-3 pl-8 overflow-hidden bg-black/40 border-white/10 ring-1 ring-white/5 rounded-[2.5rem]">

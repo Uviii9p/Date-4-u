@@ -10,7 +10,6 @@ const SwipeCard = ({ user, onSwipe, isTop }) => {
     const rotate = useTransform(x, [-300, 300], [-30, 30]);
     const opacity = useTransform(x, [-300, -250, 0, 250, 300], [0, 1, 1, 1, 0]);
 
-    // Smooth indicators
     const likeScale = useTransform(x, [0, 150], [0.8, 1.2]);
     const likeOpacity = useTransform(x, [50, 150], [0, 1]);
     const nopeScale = useTransform(x, [0, -150], [0.8, 1.2]);
@@ -31,7 +30,7 @@ const SwipeCard = ({ user, onSwipe, isTop }) => {
             setCurrentImgIndex(prev => prev + 1);
             setImgError(false);
         } else {
-            setCurrentImgIndex(0); // Loop
+            setCurrentImgIndex(0);
             setImgError(false);
         }
     };
@@ -44,7 +43,6 @@ const SwipeCard = ({ user, onSwipe, isTop }) => {
         }
     };
 
-    // Better fallback image logic
     const femalePlaceholder = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1974&auto=format&fit=crop";
     const malePlaceholder = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1974&auto=format&fit=crop";
     const fallbackImage = user.gender === 'female' ? femalePlaceholder : malePlaceholder;
@@ -54,7 +52,7 @@ const SwipeCard = ({ user, onSwipe, isTop }) => {
             return fallbackImage;
         }
         const img = user.images[currentImgIndex];
-        if (img.startsWith('http')) return img;
+        if (img.startsWith('http') || img.startsWith('data:')) return img;
         const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:5000';
         return `${backendUrl}${img}`;
     };
@@ -76,7 +74,6 @@ const SwipeCard = ({ user, onSwipe, isTop }) => {
             className="absolute inset-x-0 top-0 h-[60vh] w-full max-w-[400px] mx-auto cursor-grab active:cursor-grabbing select-none"
         >
             <div className="relative h-full w-full rounded-[2rem] overflow-hidden bg-neutral-900 shadow-[0_20px_40px_rgba(0,0,0,0.6)] group border border-white/5">
-                {/* Image Layer */}
                 <div className="absolute inset-0 bg-neutral-900 flex items-center justify-center">
                     <AnimatePresence mode="wait">
                         <motion.img
@@ -90,12 +87,9 @@ const SwipeCard = ({ user, onSwipe, isTop }) => {
                             alt={user.name}
                         />
                     </AnimatePresence>
-
-                    {/* Shadow Scrim */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-90" />
                 </div>
 
-                {/* Top Bar Indicators */}
                 <div className="absolute top-4 inset-x-6 flex gap-1.5 z-30">
                     {(user.images?.length > 1) && user.images.map((_, i) => (
                         <div key={i} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
@@ -106,13 +100,11 @@ const SwipeCard = ({ user, onSwipe, isTop }) => {
                     ))}
                 </div>
 
-                {/* Interaction Taps */}
                 <div className="absolute inset-0 flex z-20">
                     <div className="h-full w-1/3" onClick={prevImage} />
                     <div className="h-full w-2/3" onClick={nextImage} />
                 </div>
 
-                {/* Content Layer */}
                 <div className="absolute inset-x-0 bottom-0 p-6 z-30 pointer-events-none">
                     <motion.div
                         initial={{ y: 10, opacity: 0 }}
@@ -151,7 +143,6 @@ const SwipeCard = ({ user, onSwipe, isTop }) => {
                     </motion.div>
                 </div>
 
-                {/* Like/Nope Stamps */}
                 <motion.div
                     style={{ opacity: likeOpacity, scale: likeScale }}
                     className="absolute top-20 left-6 border-4 border-green-500 text-green-500 px-4 py-1 rounded-xl font-black text-3xl -rotate-12 uppercase tracking-tighter z-50 pointer-events-none"

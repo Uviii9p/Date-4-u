@@ -46,14 +46,19 @@ export async function PUT(req) {
             if (formData.has('gender')) updates.gender = formData.get('gender');
             if (formData.has('genderPreference')) updates.genderPreference = formData.get('genderPreference');
 
-            const imagesStr = formData.get('images');
-            if (imagesStr) {
-                try {
-                    updates.images = JSON.parse(imagesStr);
-                } catch {
-                    // If it's a single string or invalid JSON
-                    updates.images = [imagesStr];
-                }
+            // Handle Image Uploads (Convert to Base64 for Vercel support without storage)
+            const imageFiles = formData.getAll('images');
+            if (imageFiles && imageFiles.length > 0) {
+                const processedImages = await Promise.all(imageFiles.map(async (item) => {
+                    if (typeof item === 'string') return item; // Existing URL/Base64
+
+                    // It's a File object
+                    const bytes = await item.arrayBuffer();
+                    const buffer = Buffer.from(bytes);
+                    const type = item.type || 'image/jpeg';
+                    return `data:${type};base64,${buffer.toString('base64')}`;
+                }));
+                updates.images = processedImages;
             }
 
             const interestsStr = formData.get('interests');

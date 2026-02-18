@@ -71,7 +71,7 @@ export default function Discover() {
   const getAvatarUrl = (targetUser) => {
     if (!targetUser?.images?.[0]) return targetUser?.gender === 'female' ? femalePlaceholder : malePlaceholder;
     const img = targetUser.images[0];
-    if (img.startsWith('http')) return img;
+    if (img.startsWith('http') || img.startsWith('data:')) return img;
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:5000';
     return `${backendUrl}${img}`;
   };
