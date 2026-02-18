@@ -79,7 +79,13 @@ const getMessages = async (req, res) => {
         const rawChat = chat.toObject ? chat.toObject() : chat;
         const populatedMembers = await Promise.all(rawChat.members.map(async (id) => {
             const u = await db.users.findById(id);
-            return u ? { _id: u._id, name: u.name, images: u.images } : id;
+            return u ? {
+                _id: u._id,
+                name: u.name,
+                images: u.images,
+                onlineStatus: u.onlineStatus,
+                lastSeen: u.lastSeen
+            } : id;
         }));
         res.json({ ...rawChat, members: populatedMembers });
     } catch (error) {
@@ -110,12 +116,25 @@ const sendMessage = async (req, res) => {
             seen: false
         };
 
-        const updatedChat = await db.chats.findByIdAndUpdate(chat._id, {
+        await db.chats.findByIdAndUpdate(chat._id, {
             $push: { messages: newMessage },
             updatedAt: new Date().toISOString()
         });
 
-        res.json(updatedChat);
+        const chatToReturn = await db.chats.findById(chat._id);
+        const rawChat = chatToReturn.toObject ? chatToReturn.toObject() : chatToReturn;
+        const populatedMembers = await Promise.all(rawChat.members.map(async (id) => {
+            const u = await db.users.findById(id);
+            return u ? {
+                _id: u._id,
+                name: u.name,
+                images: u.images,
+                onlineStatus: u.onlineStatus,
+                lastSeen: u.lastSeen
+            } : id;
+        }));
+
+        res.json({ ...rawChat, members: populatedMembers });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -161,12 +180,25 @@ const sendMedia = async (req, res) => {
             seen: false
         };
 
-        const updatedChat = await db.chats.findByIdAndUpdate(chat._id, {
+        await db.chats.findByIdAndUpdate(chat._id, {
             $push: { messages: newMessage },
             updatedAt: new Date().toISOString()
         });
 
-        res.json(updatedChat);
+        const chatToReturn = await db.chats.findById(chat._id);
+        const rawChat = chatToReturn.toObject ? chatToReturn.toObject() : chatToReturn;
+        const populatedMembers = await Promise.all(rawChat.members.map(async (id) => {
+            const u = await db.users.findById(id);
+            return u ? {
+                _id: u._id,
+                name: u.name,
+                images: u.images,
+                onlineStatus: u.onlineStatus,
+                lastSeen: u.lastSeen
+            } : id;
+        }));
+
+        res.json({ ...rawChat, members: populatedMembers });
     } catch (error) {
         console.error('sendMedia error:', error);
         res.status(500).json({ message: error.message });

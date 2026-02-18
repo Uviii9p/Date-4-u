@@ -1,5 +1,6 @@
 import dbConnect from '@/lib/mongoose';
 import Chat from '@/models/Chat';
+import User from '@/models/User';
 import { NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 
@@ -41,7 +42,13 @@ export async function POST(req) {
         chat.updatedAt = new Date();
         await chat.save();
 
-        return NextResponse.json(chat.toObject());
+        const rawChat = chat.toObject();
+        const populatedMembers = await Promise.all(rawChat.members.map(async (id) => {
+            const u = await User.findById(id).select('_id name images');
+            return u ? u.toObject() : { _id: id, name: 'Unknown' };
+        }));
+
+        return NextResponse.json({ ...rawChat, members: populatedMembers });
     } catch (error) {
         console.error('Send Message Error:', error);
         return NextResponse.json({ message: error.message }, { status: 500 });

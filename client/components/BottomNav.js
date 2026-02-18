@@ -9,7 +9,9 @@ const BottomNav = () => {
     const pathname = usePathname();
     const { user } = useAuth();
 
-    if (!user || pathname === '/login' || pathname === '/register') return null;
+    const isChatRoom = pathname.startsWith('/chat/') && pathname !== '/chat';
+
+    if (!user || pathname === '/login' || pathname === '/register' || isChatRoom) return null;
 
     const navItems = [
         { href: '/', icon: Flame, label: 'Vibe' },
