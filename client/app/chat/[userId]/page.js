@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { useSocket } from '@/hooks/useSocket';
+import { useSocket } from '@/context/SocketContext';
 import api from '@/lib/api';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Send, Phone, Video, MoreHorizontal, Shield, Info, ImageIcon, Film, X, Camera, Paperclip, Play, Download, Trash2, MapPin, Zap, Lock, Sparkles, Activity, Check, CheckCheck } from 'lucide-react';
@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function ChatRoom() {
     const { userId } = useParams();
     const { user } = useAuth();
-    const socket = useSocket(user?._id);
+    const socket = useSocket();
     const router = useRouter();
     const [chat, setChat] = useState(null);
     const [messages, setMessages] = useState([]);

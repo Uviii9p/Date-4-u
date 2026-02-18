@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useCall } from '@/context/CallContext';
-import { useSocket } from '@/hooks/useSocket';
+import { useSocket } from '@/context/SocketContext';
 import { Mic, MicOff, Video, VideoOff, PhoneOff, User, PhoneCall, Shield, Zap, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -13,7 +13,7 @@ let Peer;
 export default function CallPage() {
     const { userId } = useParams();
     const { user } = useAuth();
-    const socket = useSocket(user?._id);
+    const socket = useSocket();
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -82,12 +82,6 @@ export default function CallPage() {
             setStatus("Signal Locked");
         });
 
-        socket.on("call accepted", (signal) => {
-            setCallAccepted(true);
-            peer.signal(signal);
-            setStatus("Signal Locked");
-        });
-
         connectionRef.current = peer;
     }, [userId, user, socket]);
 
@@ -124,6 +118,14 @@ export default function CallPage() {
     useEffect(() => {
         if (!socket || !Peer) return;
 
+        socket.on("call accepted", (signal) => {
+            if (connectionRef.current && !callAccepted) {
+                setCallAccepted(true);
+                connectionRef.current.signal(signal);
+                setStatus("Signal Locked");
+            }
+        });
+
         setupStream().then((mediaStream) => {
             if (mediaStream) {
                 if (isReceiving) {
@@ -139,9 +141,11 @@ export default function CallPage() {
         });
 
         return () => {
+            socket.off("call accepted");
+            socket.off("call ended");
             if (connectionRef.current) connectionRef.current.destroy();
         };
-    }, [socket, Peer, isReceiving, setupStream, callUser, answerCall]);
+    }, [socket, Peer, isReceiving, setupStream, callUser, answerCall, callAccepted]);
 
     const leaveCall = () => {
         setCallEnded(true);

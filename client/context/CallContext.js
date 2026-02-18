@@ -1,7 +1,7 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useAuth } from './AuthContext';
-import { useSocket } from '@/hooks/useSocket';
+import { useSocket } from './SocketContext';
 import { useRouter } from 'next/navigation';
 import { Phone, Video, X, PhoneCall } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,7 +10,7 @@ const CallContext = createContext();
 
 export const CallProvider = ({ children }) => {
     const { user } = useAuth();
-    const socket = useSocket(user?._id);
+    const socket = useSocket();
     const router = useRouter();
 
     const [incomingCall, setIncomingCall] = useState(null);
@@ -33,8 +33,8 @@ export const CallProvider = ({ children }) => {
     const acceptCall = () => {
         if (incomingCall) {
             const userId = incomingCall.from;
-            const type = incomingCall.signal?.video ? 'video' : 'audio'; // Check from signal if available
-            setIncomingCall(null);
+            const type = incomingCall.signal?.video ? 'video' : 'audio';
+            // DON'T clear incomingCall here! CallPage needs it.
             router.push(`/call/${userId}?type=${type}&receiving=true`);
         }
     };
