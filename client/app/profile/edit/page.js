@@ -59,7 +59,9 @@ export default function EditProfile() {
             router.push('/profile');
         } catch (err) {
             console.error('Update profile error:', err);
-            alert(err.response?.data?.message || 'Update failed');
+            const msg = err.response?.data?.message || 'Update failed';
+            const details = err.response?.data?.details;
+            alert(details ? `${msg}: ${details.join(', ')}` : msg);
         } finally {
             setLoading(false);
         }
@@ -124,6 +126,32 @@ export default function EditProfile() {
                 {/* Basic Info */}
                 <form onSubmit={handleSubmit} className="space-y-8">
                     <div className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="group">
+                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-3 block px-1">Full Name</label>
+                                <input
+                                    type="text"
+                                    value={formData.name}
+                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                    className="w-full bg-white/5 rounded-2xl p-4 outline-none border border-white/5 focus:border-pink-500/50 focus:bg-white/10 transition-all text-sm font-bold"
+                                    placeholder="Your Name"
+                                    required
+                                />
+                            </div>
+                            <div className="group">
+                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-3 block px-1">Age</label>
+                                <input
+                                    type="number"
+                                    value={formData.age}
+                                    onChange={e => setFormData({ ...formData, age: e.target.value })}
+                                    className="w-full bg-white/5 rounded-2xl p-4 outline-none border border-white/5 focus:border-pink-500/50 focus:bg-white/10 transition-all text-sm font-bold"
+                                    placeholder="18+"
+                                    min="18"
+                                    required
+                                />
+                            </div>
+                        </div>
+
                         <div className="group">
                             <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-3 block px-1">About Me</label>
                             <textarea
