@@ -28,13 +28,12 @@ const userSchema = new mongoose.Schema({
 
 userSchema.index({ location: '2dsphere' });
 
-userSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next();
+userSchema.pre('save', async function () {
+    if (!this.isModified('password')) return;
     // Only hash if it's not already hashed (starts with $2b$ or similar)
     if (!this.password.startsWith('$2')) {
         this.password = await bcrypt.hash(this.password, 10);
     }
-    next();
 });
 
 userSchema.methods.comparePassword = async function (candidatePassword) {

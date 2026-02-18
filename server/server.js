@@ -5,6 +5,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const http = require('http');
 const { Server } = require('socket.io');
+const db = require('./db');
 
 const app = express();
 const server = http.createServer(app);
@@ -56,7 +57,7 @@ console.log('Local File Storage initialized');
 app.get('/api/health', (req, res) => {
     res.json({
         status: 'UP',
-        storage: 'LOCAL_FILE_SYSTEM'
+        storage: db.isUsingMongoDB ? 'MONGODB' : 'LOCAL_FILE_SYSTEM'
     });
 });
 
@@ -74,6 +75,16 @@ app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/matches', require('./routes/matchRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error('🔥 Global Error:', err);
+    log(`Error: ${err.message}`);
+    res.status(500).json({
+        message: err.message,
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+});
 
 // 404 Handler
 app.use((req, res) => {

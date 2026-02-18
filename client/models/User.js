@@ -28,23 +28,19 @@ const userSchema = new mongoose.Schema({
 
 userSchema.index({ location: '2dsphere' });
 
-userSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next();
+userSchema.pre('save', async function () {
+    if (!this.isModified('password')) return;
     if (!this.password.startsWith('$2')) {
         this.password = await bcrypt.hash(this.password, 10);
     }
-    next();
 });
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
     return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Prevent model recompilation error in development/serverless
-if (mongoose.models.User) {
-    delete mongoose.models.User;
-}
-
-const User = mongoose.model('User', userSchema);
+// Properly reuse existing model in serverless/hot-reload environments
+const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 export default User;
+
