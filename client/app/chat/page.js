@@ -35,8 +35,9 @@ export default function Chats() {
         if (!recipient?.images?.[0]) return recipient?.gender === 'female' ? femalePlaceholder : malePlaceholder;
         const img = recipient.images[0];
         if (img.startsWith('http') || img.startsWith('data:')) return img;
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.1.1.1:5000';
-        return `${backendUrl}${img}`;
+        const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.1.1.1:5000').replace(/\/$/, '');
+        const cleanImg = img.startsWith('/') ? img : `/${img}`;
+        return `${backendUrl}${cleanImg}`;
     };
 
     const filteredChats = chats.filter(chat => {

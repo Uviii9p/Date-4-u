@@ -72,8 +72,9 @@ export default function Discover() {
     if (!targetUser?.images?.[0]) return targetUser?.gender === 'female' ? femalePlaceholder : malePlaceholder;
     const img = targetUser.images[0];
     if (img.startsWith('http') || img.startsWith('data:')) return img;
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:5000';
-    return `${backendUrl}${img}`;
+    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.1.1.1:5000').replace(/\/$/, '');
+    const cleanImg = img.startsWith('/') ? img : `/${img}`;
+    return `${backendUrl}${cleanImg}`;
   };
 
   if (authLoading || (loading && profiles.length === 0)) {

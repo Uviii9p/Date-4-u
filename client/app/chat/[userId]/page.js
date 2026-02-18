@@ -221,8 +221,17 @@ export default function ChatRoom() {
         if (!recipient?.images?.[0]) return recipient?.gender === 'female' ? femalePlaceholder : malePlaceholder;
         const img = recipient.images[0];
         if (img.startsWith('http') || img.startsWith('data:')) return img;
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:5000';
-        return `${backendUrl}${img}`;
+        const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.1.1.1:5000').replace(/\/$/, '');
+        const cleanImg = img.startsWith('/') ? img : `/${img}`;
+        return `${backendUrl}${cleanImg}`;
+    };
+
+    const resolveMediaUrl = (url) => {
+        if (!url) return '';
+        if (url.startsWith('http') || url.startsWith('data:')) return url;
+        const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.1.1.1:5000').replace(/\/$/, '');
+        const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+        return `${backendUrl}${cleanUrl}`;
     };
 
     if (!chat) return (
@@ -323,10 +332,10 @@ export default function ChatRoom() {
 
                                             {isMedia ? (
                                                 msg.type === 'image' ? (
-                                                    <img src={msg.mediaUrl} className="max-w-[240px] rounded-[1.4rem] object-cover cursor-pointer hover:brightness-110 transition-all" onClick={() => setLightboxMedia(msg.mediaUrl)} />
+                                                    <img src={resolveMediaUrl(msg.mediaUrl)} className="max-w-[240px] rounded-[1.4rem] object-cover cursor-pointer hover:brightness-110 transition-all" onClick={() => setLightboxMedia(resolveMediaUrl(msg.mediaUrl))} />
                                                 ) : (
                                                     <div className="relative w-[240px] aspect-video rounded-[1.4rem] overflow-hidden bg-black flex items-center justify-center">
-                                                        <video src={msg.mediaUrl} className="w-full h-full object-cover opacity-70" />
+                                                        <video src={resolveMediaUrl(msg.mediaUrl)} className="w-full h-full object-cover opacity-70" />
                                                         <div className="absolute w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shadow-2xl">
                                                             <Play className="text-white ml-1" fill="white" size={20} />
                                                         </div>
@@ -468,6 +477,23 @@ export default function ChatRoom() {
 
                 <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSelect} accept="image/*,video/*" />
             </footer>
+
+            {/* Lightbox Overlay */}
+            <AnimatePresence>
+                {lightboxMedia && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[500] bg-black/98 backdrop-blur-2xl flex items-center justify-center p-4">
+                        <button onClick={() => setLightboxMedia(null)} className="absolute top-8 right-8 p-4 bg-white/5 hover:bg-white/10 rounded-2xl text-white transition-all"><X size={28} /></button>
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative max-w-full max-h-full">
+                            <img src={lightboxMedia} className="max-w-full max-h-[85vh] object-contain rounded-3xl shadow-2xl shadow-pink-500/20" alt="Full view" />
+                            <div className="mt-8 flex justify-center gap-4">
+                                <a href={lightboxMedia} download className="px-8 py-4 bg-white/5 hover:bg-white text-white hover:text-black rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3">
+                                    <Download size={18} /> Signal Salvage
+                                </a>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <style jsx global>{`
                 .custom-scrollbar::-webkit-scrollbar { width: 4px; }

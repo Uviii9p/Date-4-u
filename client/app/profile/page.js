@@ -40,8 +40,9 @@ export default function Profile() {
         // Handle Base64 strings
         if (img.startsWith('data:')) return img;
         // Handle relative paths (Local uploads)
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:5000';
-        return `${backendUrl}${img}`;
+        const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.1.1.1:5000').replace(/\/$/, '');
+        const cleanImg = img.startsWith('/') ? img : `/${img}`;
+        return `${backendUrl}${cleanImg}`;
     };
 
     return (
