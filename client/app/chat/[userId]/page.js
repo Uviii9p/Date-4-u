@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useSocket } from '@/hooks/useSocket';
 import api from '@/lib/api';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Send, Phone, Video, MoreHorizontal, Shield, Info, ImageIcon, Film, X, Camera, Paperclip, Play, Download, Trash2, MapPin, Zap, Lock, Sparkles, Activity } from 'lucide-react';
+import { ArrowLeft, Send, Phone, Video, MoreHorizontal, Shield, Info, ImageIcon, Film, X, Camera, Paperclip, Play, Download, Trash2, MapPin, Zap, Lock, Sparkles, Activity, Check, CheckCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ChatRoom() {
@@ -22,8 +22,12 @@ export default function ChatRoom() {
     const [mediaPreview, setMediaPreview] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [lightboxMedia, setLightboxMedia] = useState(null);
+    const [showCamera, setShowCamera] = useState(false);
+    const [cameraStream, setCameraStream] = useState(null);
     const scrollRef = useRef();
     const fileInputRef = useRef();
+    const videoRef = useRef();
+    const canvasRef = useRef();
 
     const femalePlaceholder = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1974&auto=format&fit=crop";
     const malePlaceholder = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1974&auto=format&fit=crop";
@@ -82,6 +86,16 @@ export default function ChatRoom() {
         }
     };
 
+    const handleDeleteMessage = async (messageId) => {
+        try {
+            await api.delete(`/chat/${chat._id}/message/${messageId}`);
+            setMessages(prev => prev.filter(m => m._id !== messageId));
+            socket.emit('delete message', { chatId: chat._id, messageId, receiverId: userId });
+        } catch (err) {
+            console.error('Delete error:', err);
+        }
+    };
+
     const handleFileSelect = (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -103,6 +117,54 @@ export default function ChatRoom() {
             size: file.size
         });
         setShowAttachMenu(false);
+    };
+
+    // Camera Logic
+    const startCamera = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            setCameraStream(stream);
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+            }
+            setShowCamera(true);
+            setShowAttachMenu(false);
+        } catch (err) {
+            console.error("Camera error:", err);
+            alert("Could not access camera. Please check permissions.");
+        }
+    };
+
+    const closeCamera = () => {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+        }
+        setCameraStream(null);
+        setShowCamera(false);
+    };
+
+    const capturePhoto = () => {
+        if (videoRef.current && canvasRef.current) {
+            const video = videoRef.current;
+            const canvas = canvasRef.current;
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob((blob) => {
+                const file = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
+                const url = URL.createObjectURL(file);
+                setMediaPreview({
+                    file,
+                    url,
+                    type: 'image',
+                    name: file.name,
+                    size: file.size
+                });
+                closeCamera();
+            }, 'image/jpeg', 0.9);
+        }
     };
 
     const handleSendMedia = async () => {
@@ -153,69 +215,69 @@ export default function ChatRoom() {
         if (!recipient?.images?.[0]) return recipient?.gender === 'female' ? femalePlaceholder : malePlaceholder;
         const img = recipient.images[0];
         if (img.startsWith('http') || img.startsWith('data:')) return img;
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.1.1.1:5000';
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:5000';
         return `${backendUrl}${img}`;
     };
 
     if (!chat) return (
-        <div className="h-screen bg-black flex flex-col items-center justify-center">
-            <motion.div animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: "linear" }} className="w-16 h-16 border-b-2 border-r-2 border-pink-500 rounded-full" />
-            <p className="mt-8 text-[9px] font-black uppercase tracking-[0.5em] text-pink-500/50">Establishing Secure Channel</p>
+        <div className="h-screen bg-[#050505] flex flex-col items-center justify-center">
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }} className="w-12 h-12 border-4 border-pink-500/20 border-t-pink-500 rounded-full" />
+            <p className="mt-6 text-[10px] font-black uppercase tracking-[0.4em] text-pink-500/40">Syncing Frequencies</p>
         </div>
     );
 
     const recipient = chat.members.find(m => m._id?.toString() === userId?.toString()) || { name: 'Vibe User' };
 
     return (
-        <div className="flex flex-col h-screen bg-black text-white relative overflow-hidden">
+        <div className="flex flex-col h-screen bg-[#0a0a0b] text-white relative overflow-hidden font-sans">
+            {/* Background Aesthetics */}
             <div className="fixed inset-0 pointer-events-none z-0">
-                <div className="absolute top-[-20%] right-[-10%] w-[70%] h-[70%] bg-pink-500/5 blur-[120px] rounded-full opacity-60 animate-pulse" />
-                <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-purple-500/5 blur-[120px] rounded-full opacity-40 animate-pulse" style={{ animationDelay: '2s' }} />
+                <div className="absolute top-[-15%] right-[-15%] w-[60%] h-[60%] bg-pink-600/10 blur-[130px] rounded-full opacity-70" />
+                <div className="absolute bottom-[-15%] left-[-15%] w-[50%] h-[50%] bg-indigo-600/5 blur-[120px] rounded-full" />
             </div>
 
-            <header className="flex items-center justify-between p-5 bg-black/60 backdrop-blur-[40px] border-b border-white/5 sticky top-0 z-[100] shadow-2xl">
+            {/* Header */}
+            <header className="flex items-center justify-between p-4 px-6 bg-[#0a0a0b]/80 backdrop-blur-3xl border-b border-white/[0.05] sticky top-0 z-[100] shadow-xl">
                 <div className="flex items-center gap-4">
-                    <button onClick={() => router.push('/chat')} className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl text-gray-400 transition-all active:scale-95 shadow-lg border border-white/5">
-                        <ArrowLeft size={22} />
+                    <button onClick={() => router.push('/chat')} className="p-2.5 bg-white/[0.03] hover:bg-white/[0.08] rounded-2xl text-white/50 hover:text-white transition-all active:scale-95 border border-white/5 shadow-inner">
+                        <ArrowLeft size={20} />
                     </button>
 
-                    <div className="flex items-center gap-4 cursor-pointer group" onClick={() => router.push(`/profile/${userId}`)}>
+                    <div className="flex items-center gap-3.5 cursor-pointer group" onClick={() => router.push(`/profile/${userId}`)}>
                         <div className="relative">
-                            <div className="w-13 h-13 rounded-[1.4rem] overflow-hidden border border-white/10 shadow-2xl transition-transform group-hover:scale-105">
+                            <div className="w-11 h-11 rounded-[1.2rem] overflow-hidden border border-white/10 shadow-2xl transition-transform group-hover:scale-105">
                                 <img src={getRecipientAvatar(recipient)} className="w-full h-full object-cover" alt="" />
                             </div>
-                            <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-4 border-black shadow-lg ${recipient.onlineStatus ? 'bg-green-500' : 'bg-gray-800'}`} />
+                            <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-[3px] border-[#0a0a0b] shadow-lg ${recipient.onlineStatus ? 'bg-green-500' : 'bg-neutral-800'}`} />
                         </div>
-                        <div className="max-w-[140px]">
-                            <h4 className="font-black text-md tracking-tight truncate leading-none mb-1.5">{recipient.name}</h4>
+                        <div>
+                            <h4 className="font-black text-[15px] tracking-tight truncate leading-none mb-1.5">{recipient.name}</h4>
                             <div className="flex items-center gap-2">
-                                <div className={`w-1.5 h-1.5 rounded-full ${isTyping ? 'bg-pink-500 animate-bounce' : (recipient.onlineStatus ? 'bg-green-500 animate-pulse' : 'bg-gray-700')}`} />
-                                <p className={`text-[8px] font-black uppercase tracking-widest ${isTyping ? 'text-pink-500' : 'text-gray-500'}`}>
-                                    {isTyping ? 'Broadcasting...' : (recipient.onlineStatus ? 'Frequency: Active' : 'Offline')}
-                                </p>
+                                <span className={`text-[9px] font-black uppercase tracking-widest ${isTyping ? 'text-pink-500 animate-pulse' : 'text-white/30'}`}>
+                                    {isTyping ? 'Typing...' : (recipient.onlineStatus ? 'Frequency: High' : 'Idle')}
+                                </span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-1.5">
-                    <button className="p-3.5 bg-white/5 hover:bg-white/10 rounded-2xl text-gray-500 hover:text-white transition-all shadow-lg border border-white/5"><Phone size={18} /></button>
-                    <button className="p-3.5 bg-white/5 hover:bg-white/10 rounded-2xl text-gray-500 hover:text-white transition-all shadow-lg border border-white/5"><Video size={18} /></button>
-                    <button onClick={() => setShowOptions(!showOptions)} className="p-3.5 bg-white/5 hover:bg-white/10 rounded-2xl text-gray-500 hover:text-white transition-all shadow-lg border border-white/5"><MoreHorizontal size={18} /></button>
+                <div className="flex items-center gap-2">
+                    <button className="p-3 bg-white/[0.03] hover:bg-white/[0.08] rounded-2xl text-white/40 hover:text-white transition-all border border-white/5"><Phone size={18} /></button>
+                    <button className="p-3 bg-white/[0.03] hover:bg-white/[0.08] rounded-2xl text-white/40 hover:text-white transition-all border border-white/5"><Video size={18} /></button>
+                    <button onClick={() => setShowOptions(!showOptions)} className="p-3 bg-white/[0.03] hover:bg-white/[0.08] rounded-2xl text-white/40 hover:text-white transition-all border border-white/5"><MoreHorizontal size={18} /></button>
                 </div>
             </header>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-8 flex flex-col custom-scrollbar relative z-10">
+            {/* Message Area */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-7 flex flex-col custom-scrollbar relative z-10 scroll-smooth">
                 <div className="flex-1" />
 
-                <div className="flex flex-col items-center py-20 opacity-20">
-                    <div className="w-20 h-20 rounded-[2.5rem] border border-dashed border-white/30 flex items-center justify-center mb-6">
-                        <Activity size={32} className="text-gray-400" />
+                <div className="flex flex-col items-center py-12 opacity-30 select-none">
+                    <div className="w-14 h-14 rounded-3xl border-2 border-dashed border-white/10 flex items-center justify-center mb-5 rotate-12">
+                        <Lock size={20} className="text-gray-500" />
                     </div>
-                    <div className="flex items-center gap-3">
-                        <Lock size={12} className="text-pink-500" />
-                        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500">End-to-End Frequency Lock</p>
-                    </div>
+                    <p className="text-[9px] font-black uppercase tracking-[0.5em] text-white/40 mb-1">Encrypted Signal</p>
+                    <p className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20">Frequency Locked: {chat?._id?.slice(-8).toUpperCase()}</p>
                 </div>
 
                 <AnimatePresence mode="popLayout">
@@ -226,38 +288,57 @@ export default function ChatRoom() {
                         return (
                             <motion.div
                                 key={msg._id || idx}
-                                initial={{ opacity: 0, x: isOwn ? 20 : -20, scale: 0.9 }}
-                                animate={{ opacity: 1, x: 0, scale: 1 }}
+                                initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
                                 layout
                                 className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
                             >
-                                <div className={`group relative max-w-[85%] ${isOwn ? 'flex-row-reverse' : 'flex-row'} flex items-end gap-3`}>
+                                <div className={`group relative max-w-[80%] flex items-end gap-3 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
                                     {!isOwn && (
-                                        <div className="w-8 h-8 rounded-xl overflow-hidden border border-white/10 shadow-xl flex-shrink-0">
+                                        <div className="w-7 h-7 rounded-lg overflow-hidden border border-white/10 shadow-lg flex-shrink-0 mb-1">
                                             <img src={getRecipientAvatar(recipient)} className="w-full h-full object-cover" />
                                         </div>
                                     )}
-                                    <div className={`${isMedia ? 'p-1.5' : 'px-6 py-4'} rounded-[2rem] glass-card ${isOwn ? 'bg-gradient-to-br from-pink-500 via-pink-600 to-purple-800 text-white rounded-tr-none shadow-[0_15px_35px_rgba(236,72,153,0.15)] ring-1 ring-pink-500/20' : 'bg-white/[0.03] border-white/10 text-white/90 rounded-tl-none shadow-2xl ring-1 ring-white/5'}`}>
-                                        {isMedia ? (
-                                            msg.type === 'image' ? (
-                                                <div className="relative group overflow-hidden rounded-[1.6rem]">
-                                                    <img src={msg.mediaUrl} className="max-w-[280px] object-cover cursor-pointer transition-transform duration-700 group-hover:scale-110" onClick={() => setLightboxMedia(msg.mediaUrl)} />
-                                                </div>
+
+                                    <div className="relative group/bubble">
+                                        <div className={`${isMedia ? 'p-1' : 'px-5 py-3.5'} rounded-[1.6rem] shadow-2xl transition-all ${isOwn
+                                            ? 'bg-gradient-to-br from-pink-500 to-purple-600 text-white rounded-tr-none ring-1 ring-white/10'
+                                            : 'bg-white/[0.06] border border-white/10 text-white/90 rounded-tl-none ring-1 ring-white/5'}`}>
+
+                                            {isMedia ? (
+                                                msg.type === 'image' ? (
+                                                    <img src={msg.mediaUrl} className="max-w-[240px] rounded-[1.4rem] object-cover cursor-pointer hover:brightness-110 transition-all" onClick={() => setLightboxMedia(msg.mediaUrl)} />
+                                                ) : (
+                                                    <div className="relative w-[240px] aspect-video rounded-[1.4rem] overflow-hidden bg-black flex items-center justify-center">
+                                                        <video src={msg.mediaUrl} className="w-full h-full object-cover opacity-70" />
+                                                        <div className="absolute w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shadow-2xl">
+                                                            <Play className="text-white ml-1" fill="white" size={20} />
+                                                        </div>
+                                                    </div>
+                                                )
                                             ) : (
-                                                <div className="relative w-[280px] aspect-video rounded-[1.6rem] overflow-hidden bg-black flex items-center justify-center group">
-                                                    <video src={msg.mediaUrl} className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" />
-                                                    <Play className="text-white absolute" fill="white" size={24} />
-                                                </div>
-                                            )
-                                        ) : (
-                                            <p className="text-[15px] font-medium leading-[1.6] tracking-tight whitespace-pre-wrap">{msg.text}</p>
-                                        )}
-                                        <div className={`flex justify-between items-center mt-2 px-1 ${isOwn ? 'text-white/40' : 'text-gray-600'}`}>
-                                            <span className="text-[9px] font-black uppercase tracking-tight">
-                                                {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </span>
-                                            {isOwn && <span className="text-[8px] font-black uppercase tracking-widest bg-white/10 px-2 py-0.5 rounded-full">{msg.seen ? 'Read' : 'Locked'}</span>}
+                                                <p className="text-[14px] leading-relaxed tracking-tight font-medium break-words whitespace-pre-wrap">{msg.text}</p>
+                                            )}
+
+                                            <div className="flex justify-between items-center mt-2.5 px-0.5 opacity-40">
+                                                <span className="text-[8px] font-black uppercase tracking-widest">{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                {isOwn && (
+                                                    <div className="flex items-center gap-1">
+                                                        {msg.seen ? <CheckCheck size={10} className="text-blue-400" /> : <Check size={10} />}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
+
+                                        {/* Delete Button */}
+                                        {isOwn && (
+                                            <button
+                                                onClick={() => handleDeleteMessage(msg._id)}
+                                                className="absolute -left-10 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-white/[0.03] hover:bg-red-500/20 text-white/20 hover:text-red-500 opacity-0 group-hover/bubble:opacity-100 transition-all active:scale-90 border border-white/5"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </motion.div>
@@ -267,33 +348,62 @@ export default function ChatRoom() {
                 <div ref={scrollRef} className="h-4" />
             </div>
 
-            <footer className="p-6 bg-black/60 backdrop-blur-[50px] border-t border-white/5 pb-11 relative z-50">
-                <AnimatePresence>
-                    {mediaPreview && (
-                        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="mb-6 p-1 bg-gradient-to-r from-pink-500/30 to-purple-600/30 rounded-[2.5rem] shadow-2xl overflow-hidden ring-1 ring-white/10">
-                            <div className="bg-neutral-900 rounded-[2.3rem] p-4 flex items-center gap-5">
-                                <div className="relative w-20 h-20 rounded-[1.8rem] overflow-hidden shadow-2xl ring-2 ring-white/5">
-                                    {mediaPreview.type === 'image' ? <img src={mediaPreview.url} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-purple-500/20 flex items-center justify-center"><Film size={26} className="text-purple-400" /></div>}
-                                    <button onClick={() => setMediaPreview(null)} className="absolute top-2 right-2 p-1.5 bg-black/60 backdrop-blur-3xl rounded-full border border-white/10 hover:bg-red-500 transition-colors"><X size={12} /></button>
+            {/* Media/Camera Previews */}
+            <AnimatePresence>
+                {mediaPreview && (
+                    <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="p-4 bg-[#0a0a0b] border-t border-white/[0.05] z-[110]">
+                        <div className="flex items-center gap-5 bg-white/[0.03] p-4 rounded-[2rem] border border-white/10 shadow-inner">
+                            <div className="relative w-22 h-22 rounded-[1.5rem] overflow-hidden shadow-2xl ring-2 ring-white/10">
+                                {mediaPreview.type === 'image' ? <img src={mediaPreview.url} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-indigo-500/20 flex items-center justify-center"><Film size={28} className="text-indigo-400" /></div>}
+                                <button onClick={() => setMediaPreview(null)} className="absolute top-1.5 right-1.5 p-1.5 bg-black/60 backdrop-blur-md rounded-full border border-white/10 hover:bg-red-500 transition-colors"><X size={12} /></button>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-[13px] font-black truncate text-white uppercase tracking-tight mb-1">{mediaPreview.name}</p>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                                    <p className="text-[9px] font-black text-green-500/70 uppercase tracking-widest">Signal Ready</p>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-black truncate text-white tracking-tight uppercase">{mediaPreview.name}</p>
-                                    <p className="text-[9px] font-black text-pink-500 mt-1 uppercase tracking-[0.2em]">Encryption Ready</p>
-                                </div>
-                                <button onClick={handleSendMedia} disabled={uploading} className="w-16 h-16 rounded-[1.8rem] bg-white text-black flex items-center justify-center shadow-[0_15px_35px_rgba(255,255,255,0.1)] active:scale-90 transition-all">
-                                    {uploading ? <div className="w-6 h-6 border-3 border-black/20 border-t-black rounded-full animate-spin" /> : <Send size={24} />}
+                            </div>
+                            <button onClick={handleSendMedia} disabled={uploading} className="w-16 h-16 rounded-[1.5rem] bg-white text-black flex items-center justify-center shadow-xl active:scale-95 transition-all">
+                                {uploading ? <div className="w-6 h-6 border-3 border-black/20 border-t-black rounded-full animate-spin" /> : <Send size={24} />}
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Camera Overlay */}
+            <AnimatePresence>
+                {showCamera && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-xl flex flex-col p-6">
+                        <div className="flex justify-between items-center mb-8">
+                            <p className="text-[11px] font-black uppercase tracking-[0.4em] text-white/40">Broadcasting Optical Sync</p>
+                            <button onClick={closeCamera} className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center"><X size={20} /></button>
+                        </div>
+                        <div className="flex-1 relative rounded-[3rem] overflow-hidden border border-white/10 bg-black shadow-2xl">
+                            <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover scale-x-[-1]" />
+                            <div className="absolute inset-0 border-[16px] border-black/20 pointer-events-none" />
+                        </div>
+                        <div className="py-12 flex justify-center items-center gap-10">
+                            <div className="p-0.5 rounded-full bg-gradient-to-r from-pink-500 to-purple-600">
+                                <button onClick={capturePhoto} className="w-20 h-20 rounded-full bg-white flex items-center justify-center text-black border-4 border-black active:scale-90 transition-all">
+                                    <Camera size={28} />
                                 </button>
                             </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                        </div>
+                        <canvas ref={canvasRef} className="hidden" />
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-                <form onSubmit={handleSendMessage} className="flex items-end gap-3 max-w-2xl mx-auto group">
-                    <button type="button" onClick={() => setShowAttachMenu(!showAttachMenu)} className="w-14 h-14 rounded-2xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-500 hover:text-white transition-all border border-white/5 shadow-lg active:scale-95">
-                        <Paperclip size={22} />
+            {/* Input Bar */}
+            <footer className="p-5 px-6 bg-[#0a0a0b]/90 backdrop-blur-3xl border-t border-white/[0.05] pb-10 relative z-[90]">
+                <form onSubmit={handleSendMessage} className="flex items-end gap-3.5 max-w-2xl mx-auto">
+                    <button type="button" onClick={() => setShowAttachMenu(!showAttachMenu)} className="w-14 h-14 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] flex items-center justify-center text-white/30 hover:text-white transition-all border border-white/5 shadow-lg relative">
+                        <Paperclip size={20} className={showAttachMenu ? 'rotate-45' : ''} />
                     </button>
 
-                    <div className="flex-1 bg-white/[0.03] border border-white/10 rounded-[2rem] px-6 py-4.5 focus-within:border-pink-500/30 focus-within:bg-white/[0.06] transition-all ring-1 ring-white/5 shadow-inner">
+                    <div className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-[1.8rem] px-6 py-[1.1rem] focus-within:bg-white/[0.07] focus-within:border-white/[0.15] transition-all shadow-inner">
                         <textarea
                             rows={1}
                             value={text}
@@ -304,58 +414,50 @@ export default function ChatRoom() {
                                     handleSendMessage();
                                 }
                             }}
-                            placeholder="Identify transmission frequency..."
-                            className="w-full bg-transparent outline-none text-[15px] font-medium resize-none placeholder:text-gray-800 tracking-tight"
+                            placeholder="Type a transmission..."
+                            className="w-full bg-transparent outline-none text-[15px] font-medium resize-none placeholder:text-white/10 tracking-tight"
                         />
                     </div>
 
                     <button
                         type="submit"
                         disabled={!text.trim()}
-                        className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-2xl active:scale-90 ${text.trim() ? 'bg-gradient-to-br from-pink-500 to-purple-700 text-white border-b-4 border-black/30' : 'bg-white/5 text-gray-800 cursor-not-allowed'}`}
+                        className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-xl active:scale-90 ${text.trim() ? 'bg-gradient-to-br from-pink-500 to-purple-700 text-white' : 'bg-white/[0.02] text-white/5'}`}
                     >
-                        <Send size={22} className={text.trim() ? 'translate-x-0.5 -translate-y-0.5' : ''} />
+                        <Send size={20} />
                     </button>
                 </form>
 
-                <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSelect} accept="image/*,video/*" />
-
+                {/* Attachment Menu */}
                 <AnimatePresence>
                     {showAttachMenu && (
-                        <motion.div initial={{ opacity: 0, scale: 0.9, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 10 }} className="absolute bottom-32 left-8 bg-[#0d0d0d] border border-white/10 p-3 rounded-[2.5rem] shadow-[0_50px_100px_rgba(0,0,0,0.8)] z-50 min-w-[200px] ring-1 ring-white/10">
-                            <button onClick={() => fileInputRef.current.click()} className="flex items-center gap-4 p-5 hover:bg-white/5 rounded-3xl w-full transition-all group">
-                                <div className="w-11 h-11 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-transform"><ImageIcon size={20} /></div>
+                        <motion.div initial={{ opacity: 0, scale: 0.95, y: 15 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 15 }} className="absolute bottom-[105%] left-6 bg-[#0f0f11] border border-white/10 p-2.5 rounded-[2rem] shadow-[0_40px_80px_rgba(0,0,0,0.8)] z-[100] min-w-[220px]">
+                            <button onClick={() => fileInputRef.current.click()} className="flex items-center gap-4 p-4.5 hover:bg-white/[0.04] rounded-[1.5rem] w-full group transition-all">
+                                <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-transform"><ImageIcon size={18} /></div>
                                 <div className="text-left">
-                                    <span className="block text-xs font-black text-white uppercase tracking-widest">Visual Matrix</span>
-                                    <span className="block text-[8px] font-black text-gray-600 uppercase tracking-widest mt-1">Image / Motion</span>
+                                    <span className="block text-[11px] font-black text-white uppercase tracking-widest">Media Matrix</span>
+                                    <span className="block text-[8px] font-bold text-white/30 uppercase mt-0.5">Gallery / Files</span>
                                 </div>
                             </button>
-                            <button onClick={() => alert('Camera access requires HTTPS locally')} className="flex items-center gap-4 p-5 hover:bg-white/5 rounded-3xl w-full transition-all group">
-                                <div className="w-11 h-11 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center border border-amber-500/20 group-hover:scale-110 transition-transform"><Camera size={20} /></div>
+                            <button onClick={startCamera} className="flex items-center gap-4 p-4.5 hover:bg-white/[0.04] rounded-[1.5rem] w-full group transition-all border-t border-white/[0.03]">
+                                <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20 group-hover:scale-110 transition-transform"><Camera size={18} /></div>
                                 <div className="text-left">
-                                    <span className="block text-xs font-black text-white uppercase tracking-widest">Optical Sync</span>
-                                    <span className="block text-[8px] font-black text-gray-600 uppercase tracking-widest mt-1">Live Capture</span>
+                                    <span className="block text-[11px] font-black text-white uppercase tracking-widest">Optical Sync</span>
+                                    <span className="block text-[8px] font-bold text-white/30 uppercase mt-0.5">Live Capture</span>
                                 </div>
                             </button>
                         </motion.div>
                     )}
                 </AnimatePresence>
+
+                <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSelect} accept="image/*,video/*" />
             </footer>
 
             <style jsx global>{`
-                .custom-scrollbar::-webkit-scrollbar {
-                    width: 4px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: rgba(255, 255, 255, 0.05);
-                    border-radius: 10px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: rgba(255, 255, 255, 0.1);
-                }
+                .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.1); }
             `}</style>
         </div>
     );
